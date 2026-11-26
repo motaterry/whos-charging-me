@@ -4,10 +4,11 @@
 // Passos:
 // 1. Limpa o nome (tira o prefixo da maquininha).
 // 2. Pede para a IA (pelo OpenRouter, com busca na web) achar a loja e o CNPJ.
-// 3. Confere o CNPJ na BrasilAPI (dados públicos da Receita).
+// 3. Confere o CNPJ em dados públicos da Receita (BrasilAPI; se falhar, CNPJ.ws; depois CNPJá).
 // 4. Devolve a loja, a fonte e o grau de certeza.
 
 import { limparNome } from "../lib/limpar-nome.js";
+import { conferirCnpj } from "../lib/receita.js";
 
 const CATEGORIAS = [
   "Alimentação", "Mercado", "Transporte", "Saúde e farmácia", "Compras",
@@ -85,44 +86,6 @@ async function perguntarIA(limpo, cidade, local) {
   const json = extrairJson(texto);
   if (!json) throw new Error("A IA respondeu num formato inesperado.");
   return json;
-}
-
-async function conferirCnpj(cnpj) {
-  const numeros = String(cnpj ?? "").replace(/\D/g, "");
-  if (numeros.length !== 14) return null;
-  let resp;
-  try {
-    resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${numeros}`, {
-      headers: { "User-Agent": "whos-charging-me" },
-    });
-  } catch (e) {
-    console.error("BrasilAPI falhou:", e.message);
-    return null;
-  }
-  if (!resp.ok) {
-    console.error("BrasilAPI respondeu", resp.status, "para", numeros);
-    return null;
-  }
-  const d = await resp.json();
-  return {
-    cnpj: numeros,
-    razao_social: d.razao_social,
-    nome_fantasia: d.nome_fantasia || null,
-    situacao: d.descricao_situacao_cadastral,
-    atividade: d.cnae_fiscal_descricao,
-    mei: d.opcao_pelo_mei === true,
-    endereco: [
-      [d.descricao_tipo_de_logradouro, d.logradouro].filter(Boolean).join(" "),
-      String(d.logradouro ?? "").includes(String(d.numero ?? "")) ? null : d.numero,
-      d.bairro,
-      d.municipio,
-      d.uf,
-    ]
-      .filter(Boolean)
-      .join(", "),
-    municipio: d.municipio || null,
-    fonte: `https://brasilapi.com.br/api/cnpj/v1/${numeros}`,
-  };
 }
 
 // Acha a latitude e longitude de um endereço no OpenStreetMap (grátis).
