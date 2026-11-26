@@ -5,6 +5,7 @@ import Cartao from "../componentes/Cartao.jsx";
 import SeloCerteza from "../componentes/SeloCerteza.jsx";
 import Ilustracao from "../componentes/Ilustracao.jsx";
 import Mapa from "../componentes/Mapa.jsx";
+import Selecao from "../componentes/Selecao.jsx";
 import { CATEGORIAS } from "../api.js";
 
 function formatarCnpj(c) {
@@ -57,12 +58,10 @@ export default function Resultado({ r, aoContestar }) {
       )}
 
       <div className="categoria">
-        <div className="campo">
-          <label htmlFor="categoria">Categoria sugerida</label>
-          <select id="categoria" value={categoria} onChange={(e) => { setCategoria(e.target.value); setSalvo(false); }}>
-            {CATEGORIAS.map((c) => <option key={c}>{c}</option>)}
-          </select>
-        </div>
+        <Selecao
+          id="categoria" rotulo="Categoria sugerida" opcoes={CATEGORIAS} valor={categoria}
+          aoMudar={(c) => { setCategoria(c); setSalvo(false); }}
+        />
         <Botao onClick={() => setSalvo(true)} disabled={salvo}>
           {salvo ? "Categoria salva ✓" : "Confirmar"}
         </Botao>

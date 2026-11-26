@@ -12,6 +12,7 @@ import Lista from "../componentes/Lista.jsx";
 import Opcao from "../componentes/Opcao.jsx";
 import Passos from "../componentes/Passos.jsx";
 import Ilustracao from "../componentes/Ilustracao.jsx";
+import Selecao from "../componentes/Selecao.jsx";
 import { contestar } from "../api.js";
 
 const BANCOS = ["C6 Bank", "Nubank", "Itaú", "Bradesco", "Santander", "Banco do Brasil", "Caixa", "Inter", "Outro"];
@@ -126,13 +127,8 @@ export default function Contestar({ nomeFatura, loja, aoVoltar }) {
           )}
 
           {tipo === "problema" && (
-            <div className="campo">
-              <label htmlFor="motivo">Qual foi o problema?</label>
-              <select id="motivo" value={motivo} onChange={(e) => setMotivo(e.target.value)}>
-                <option value="">Escolha um motivo</option>
-                {MOTIVOS_PROBLEMA.map((m) => <option key={m}>{m}</option>)}
-              </select>
-            </div>
+            <Selecao id="motivo" rotulo="Qual foi o problema?" opcoes={MOTIVOS_PROBLEMA}
+              valor={motivo} aoMudar={setMotivo} placeholder="Escolha um motivo" />
           )}
 
           <div className="grupo-botoes">
@@ -145,13 +141,7 @@ export default function Contestar({ nomeFatura, loja, aoVoltar }) {
         <>
           <Passos atual={3} total={TOTAL} titulo="Seu banco" />
           <h2 id="titulo-contestar">Qual é o banco do cartão?</h2>
-          <div className="campo">
-            <label htmlFor="banco">Banco</label>
-            <select id="banco" value={banco} onChange={(e) => setBanco(e.target.value)}>
-              <option value="">Escolha o banco</option>
-              {BANCOS.map((b) => <option key={b}>{b}</option>)}
-            </select>
-          </div>
+          <Selecao id="banco" rotulo="Banco" opcoes={BANCOS} valor={banco} aoMudar={setBanco} placeholder="Escolha o banco" />
           <Campo id="valor" rotulo="Valor da compra" opcional="se souber" placeholder="Ex.: R$ 49,90"
             value={valor} onChange={(e) => setValor(e.target.value)} inputMode="decimal" />
           <Campo id="data" rotulo="Data da compra" opcional="se souber" type="date"
