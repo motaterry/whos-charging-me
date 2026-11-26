@@ -6,11 +6,12 @@
 // 2. Pede para a IA (pelo OpenRouter, com busca na web) achar a loja e o CNPJ.
 // 3. Confere o CNPJ em dados públicos da Receita (BrasilAPI; se falhar, CNPJ.ws; depois CNPJá).
 // 4. Devolve a loja, a fonte e o grau de certeza.
-// Se a loja for MEI, esconde o nome do dono, o CPF e a rua (ver lib/privacidade.js).
+// Se a loja for de uma pessoa só (MEI ou empresário individual), mostra só o primeiro nome
+// do dono e esconde o sobrenome, o CPF e a rua (ver lib/privacidade.js).
 
 import { limparNome } from "../lib/limpar-nome.js";
 import { conferirCnpj } from "../lib/receita.js";
-import { receitaPublica, lojaPublica, fontesPublicas, limparTexto, nomeDoDono } from "../lib/privacidade.js";
+import { receitaPublica, lojaPublica, fontesPublicas, limparTexto, nomeDoDono, eDePessoa } from "../lib/privacidade.js";
 
 const CATEGORIAS = [
   "Alimentação", "Mercado", "Transporte", "Saúde e farmácia", "Compras",
@@ -152,12 +153,12 @@ export default async function handler(req, res) {
     }
 
     // Se o banco mandou o local, compara com o endereço da Receita.
-    // MEI: o endereço costuma ser a casa do dono. Então usamos só o bairro e a cidade
+    // MEI ou empresário individual: o endereço costuma ser a casa do dono. Então usamos só o bairro e a cidade
     // (um ponto aproximado), e a rua nem sai do servidor.
     let distancia = null;
     let distanciaAproximada = false;
     const pontoCompra = local?.lat && local?.lon ? { lat: Number(local.lat), lon: Number(local.lon) } : null;
-    if (pontoCompra && receita?.mei) {
+    if (pontoCompra && eDePessoa(receita)) {
       const bairro = receita.bairro ? [receita.bairro, receita.municipio, receita.uf].filter(Boolean).join(", ") : null;
       const pontoBairro = await acharCoordenadas(bairro);
       if (pontoBairro) {
@@ -185,22 +186,22 @@ export default async function handler(req, res) {
       }
     }
 
-    // MEI: tira o nome do dono e o CPF de tudo que vai para a tela.
-    const dono = receita?.mei ? nomeDoDono(receita.razao_social) : null;
+    // Loja de uma pessoa só: tira o sobrenome do dono e o CPF de tudo que vai para a tela.
+    const dono = eDePessoa(receita) ? nomeDoDono(receita.razao_social) : null;
 
     res.status(200).json({
       entrada: limpo,
       loja: lojaPublica(ia.loja, receita),
       categoria: ia.categoria,
       certeza,
-      explicacao: receita?.mei ? limparTexto(ia.explicacao, dono) : ia.explicacao,
+      explicacao: dono ? limparTexto(ia.explicacao, dono) : ia.explicacao,
       aviso,
       fontes: fontesPublicas(ia.fontes ?? [], receita),
       cnpj_sugerido: ia.cnpj ?? null, // o CNPJ que a IA achou, antes de conferir
-      receita: receitaPublica(receita), // null quando não deu para confirmar o CNPJ. MEI: sem nome oficial e sem rua.
+      receita: receitaPublica(receita), // null quando não deu para confirmar o CNPJ. MEI ou individual: sem nome oficial, sem sobrenome e sem rua.
       local, // o local que o banco mandou (ou null)
       distancia, // metros entre o local da compra e o endereço da Receita (ou null)
-      distancia_aproximada: distanciaAproximada, // true no MEI: medida até o centro do bairro
+      distancia_aproximada: distanciaAproximada, // true no MEI ou individual: medida até o centro do bairro
     });
   } catch (e) {
     res.status(502).json({ erro: e.message, entrada: limpo });

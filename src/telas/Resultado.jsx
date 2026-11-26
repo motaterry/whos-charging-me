@@ -17,14 +17,17 @@ export default function Resultado({ r, aoContestar }) {
 
   const linhas = [];
   if (r.entrada?.intermediario) linhas.push(["Maquininha", r.entrada.intermediario]);
-  // MEI: a API já não manda o nome do dono nem a rua (LGPD). Mostramos só bairro e cidade.
+  // MEI ou empresário individual: a API já não manda o nome completo do dono nem a rua (LGPD).
+  // Mostramos só os primeiros nomes, o bairro e a cidade.
   const protegido = r.receita?.dados_protegidos === true;
+  const tipoPessoa = r.receita?.mei ? "MEI (microempreendedor)" : "Empresário individual (empresa de uma pessoa só)";
   if (r.receita && protegido) {
     if (r.receita.nome_fantasia) linhas.push(["Nome da loja", r.receita.nome_fantasia]);
+    if (r.receita.nome_dono) linhas.push(["Dono", r.receita.nome_dono]);
     linhas.push(["CNPJ", formatarCnpj(r.receita.cnpj)]);
     linhas.push(["Bairro e cidade", [r.receita.bairro, r.receita.municipio].filter(Boolean).join(", ") + (r.receita.uf ? ` (${r.receita.uf})` : "")]);
     linhas.push(["Atividade", r.receita.atividade]);
-    linhas.push(["Tipo", "MEI (microempreendedor)"]);
+    linhas.push(["Tipo", tipoPessoa]);
   } else if (r.receita) {
     linhas.push(["Nome oficial", r.receita.razao_social]);
     linhas.push(["CNPJ", formatarCnpj(r.receita.cnpj)]);
@@ -66,7 +69,7 @@ export default function Resultado({ r, aoContestar }) {
 
       {protegido && (
         <p className="ajuda-texto">
-          🔒 É um MEI (microempreendedor). Para proteger a pessoa dona do negócio, não mostramos o nome dela nem o endereço completo (LGPD).
+          🔒 É {r.receita.mei ? "um MEI" : "uma empresa de uma pessoa só"}. Para proteger quem é dono do negócio, mostramos só os primeiros nomes. Não mostramos sobrenome, CPF nem endereço completo (LGPD).
         </p>
       )}
 
