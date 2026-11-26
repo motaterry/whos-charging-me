@@ -1,0 +1,70 @@
+/* Design system: as cores, tamanhos e espaços ficam todos aqui.
+   Para mudar o visual do site inteiro, mude só este arquivo.
+   Estilo: fundo claro "pergaminho", cartões brancos sem borda, um único azul para ações,
+   botões em formato de pílula e títulos com letras um pouco mais juntas. */
+:root {
+  /* Cores base */
+  --cor-fundo: #f5f5f7;           /* pergaminho */
+  --cor-superficie: #ffffff;      /* cartões e campos */
+  --cor-texto: #1d1d1f;           /* tinta */
+  --cor-texto-suave: #6e6e73;     /* textos de apoio (contraste AA) */
+  --cor-linha: #e0e0e0;           /* linha fina */
+  --cor-destaque: #0066cc;        /* azul de ação: o único azul do site */
+  --cor-destaque-foco: #0071e3;
+  --cor-sobre-destaque: #ffffff;
+
+  /* Cores de estado (o guia não traz; escolhidas para contraste AA) */
+  --cor-erro: #c4281c;
+  --cor-erro-fundo: #fdecea;
+  --cor-certeza-alta: #1e7b34;
+  --cor-certeza-media: #8a5a00;
+  --cor-certeza-baixa: #c4281c;
+
+  /* Tipografia: fonte do sistema; Inter se o sistema não tiver uma boa */
+  --fonte: system-ui, -apple-system, "Inter", "Segoe UI", sans-serif;
+  --texto-legenda: 14px;
+  --texto-corpo: 17px;
+  --texto-chamada: 21px;
+  --texto-titulo: 28px;
+  --texto-display: 40px;
+  --espacamento-letras-corpo: -0.374px;
+  --espacamento-letras-legenda: -0.224px;
+  --espacamento-letras-titulo: -0.28px;
+
+  /* Espaços */
+  --espaco-1: 4px;
+  --espaco-2: 8px;
+  --espaco-3: 12px;
+  --espaco-4: 17px;
+  --espaco-5: 24px;
+  --espaco-6: 32px;
+  --espaco-7: 48px;
+
+  /* Cantos */
+  --raio-p: 8px;
+  --raio-m: 11px;
+  --raio-g: 18px;
+  --raio-pilula: 9999px;
+
+  /* Sombra: só uma, leve, para o cartão de resultado */
+  --sombra-cartao: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cor-fundo: #000000;
+    --cor-superficie: #272729;
+    --cor-texto: #ffffff;
+    --cor-texto-suave: #a1a1a6;
+    --cor-linha: #3a3a3c;
+    --cor-destaque: #2997ff;
+    --cor-destaque-foco: #2997ff;
+    --cor-sobre-destaque: #000000; /* texto preto no azul claro: contraste melhor */
+    --cor-erro: #ff6961;
+    --cor-erro-fundo: #3a1714;
+    --cor-certeza-alta: #6fd28a;
+    --cor-certeza-media: #f2c94c;
+    --cor-certeza-baixa: #ff6961;
+    --sombra-cartao: none;
+  }
+}
