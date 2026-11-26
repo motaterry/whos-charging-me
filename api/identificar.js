@@ -111,6 +111,7 @@ async function conferirCnpj(cnpj) {
     ]
       .filter(Boolean)
       .join(", "),
+    municipio: d.municipio || null,
     fonte: `https://brasilapi.com.br/api/cnpj/v1/${numeros}`,
   };
 }
@@ -138,12 +139,21 @@ export default async function handler(req, res) {
     if (receita && certeza === "media") certeza = "alta";
     if (!receita && certeza === "alta") certeza = "media";
 
+    // Se a empresa da Receita fica em outra cidade, a certeza cai.
+    let aviso = null;
+    const normal = (t) => String(t ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+    if (receita?.municipio && cidade && normal(receita.municipio) !== normal(cidade)) {
+      certeza = "baixa";
+      aviso = `A empresa achada fica em ${receita.municipio}, não em ${cidade}. Confira antes de confirmar.`;
+    }
+
     res.status(200).json({
       entrada: limpo,
       loja: ia.loja,
       categoria: ia.categoria,
       certeza,
       explicacao: ia.explicacao,
+      aviso,
       fontes: ia.fontes ?? [],
       cnpj_sugerido: ia.cnpj ?? null, // o CNPJ que a IA achou, antes de conferir
       receita, // null quando não deu para confirmar o CNPJ

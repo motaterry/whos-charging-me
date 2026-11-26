@@ -32,7 +32,7 @@ function mostrarResultado(r) {
   const selo = $("res-certeza");
   selo.textContent = TEXTO_CERTEZA[r.certeza] || "Certeza desconhecida";
   selo.dataset.nivel = r.certeza || "baixa";
-  $("res-explicacao").textContent = r.explicacao || "";
+  $("res-explicacao").textContent = [r.explicacao, r.aviso].filter(Boolean).join(" ");
 
   const dados = $("res-dados");
   dados.innerHTML = "";
