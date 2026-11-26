@@ -17,7 +17,15 @@ export default function Resultado({ r, aoContestar }) {
 
   const linhas = [];
   if (r.entrada?.intermediario) linhas.push(["Maquininha", r.entrada.intermediario]);
-  if (r.receita) {
+  // MEI: a API já não manda o nome do dono nem a rua (LGPD). Mostramos só bairro e cidade.
+  const protegido = r.receita?.dados_protegidos === true;
+  if (r.receita && protegido) {
+    if (r.receita.nome_fantasia) linhas.push(["Nome da loja", r.receita.nome_fantasia]);
+    linhas.push(["CNPJ", formatarCnpj(r.receita.cnpj)]);
+    linhas.push(["Bairro e cidade", [r.receita.bairro, r.receita.municipio].filter(Boolean).join(", ") + (r.receita.uf ? ` (${r.receita.uf})` : "")]);
+    linhas.push(["Atividade", r.receita.atividade]);
+    linhas.push(["Tipo", "MEI (microempreendedor)"]);
+  } else if (r.receita) {
     linhas.push(["Nome oficial", r.receita.razao_social]);
     linhas.push(["CNPJ", formatarCnpj(r.receita.cnpj)]);
     linhas.push(["Endereço", r.receita.endereco]);
@@ -56,6 +64,12 @@ export default function Resultado({ r, aoContestar }) {
         </dl>
       )}
 
+      {protegido && (
+        <p className="ajuda-texto">
+          🔒 É um MEI (microempreendedor). Para proteger a pessoa dona do negócio, não mostramos o nome dela nem o endereço completo (LGPD).
+        </p>
+      )}
+
       <div className="categoria">
         <div className="campo">
           <label htmlFor="categoria">Categoria sugerida</label>
@@ -69,9 +83,10 @@ export default function Resultado({ r, aoContestar }) {
       </div>
 
       <details className="fontes">
-        <summary>Ver as fontes ({fontes.length})</summary>
+        <summary>Ver as fontes ({fontes.length + (protegido && r.receita.fonte_nome ? 1 : 0)})</summary>
         <ul>
-          {fontes.length === 0 && <li>Nenhuma fonte informada.</li>}
+          {protegido && r.receita.fonte_nome && <li>Dados públicos da Receita, conferidos na {r.receita.fonte_nome} (link escondido porque mostra dados pessoais do dono)</li>}
+          {fontes.length === 0 && !protegido && <li>Nenhuma fonte informada.</li>}
           {fontes.map((f) => (
             <li key={f}><a href={f} target="_blank" rel="noopener noreferrer">{f}</a></li>
           ))}
