@@ -1,0 +1,6 @@
+# Senhas e chaves: nunca vão para o GitHub
+.env
+.env.local
+node_modules/
+.vercel/
+.DS_Store
