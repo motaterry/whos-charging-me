@@ -26,7 +26,8 @@ export default function App() {
     try {
       setResultado(await identificar(n.trim(), c.trim()));
     } catch (e) {
-      setErro(`Não conseguimos buscar agora. ${e.message} Tente de novo em alguns segundos.`);
+      console.error(e);
+      setErro("Não conseguimos buscar agora. Confira sua internet e tente de novo em alguns segundos.");
     } finally {
       setCarregando(false);
     }
@@ -56,7 +57,7 @@ export default function App() {
             nome={nome} cidade={cidade} setNome={setNome} setCidade={setCidade}
             carregando={carregando} aoBuscar={buscar} aoLimpar={limpar}
           />
-          {carregando && <Aviso>Procurando a loja na internet e na Receita. Leva uns 10 segundos...</Aviso>}
+          {carregando && <Aviso tipo="carregando">Procurando a loja na internet e na Receita. Leva uns 10 segundos...</Aviso>}
           {erro && <Aviso tipo="erro">{erro}</Aviso>}
           {resultado && <Resultado key={resultado.loja} r={resultado} aoContestar={() => setTela("contestar")} />}
         </>
