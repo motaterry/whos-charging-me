@@ -1,0 +1,74 @@
+// Tela 2: mostra a loja que achamos, a certeza, os dados da Receita e as fontes.
+import { useState } from "react";
+import Botao from "../componentes/Botao.jsx";
+import Cartao from "../componentes/Cartao.jsx";
+import SeloCerteza from "../componentes/SeloCerteza.jsx";
+import { CATEGORIAS } from "../api.js";
+
+function formatarCnpj(c) {
+  return c.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+}
+
+export default function Resultado({ r, aoContestar }) {
+  const [categoria, setCategoria] = useState(r.categoria || "Outros");
+  const [salvo, setSalvo] = useState(false);
+
+  const linhas = [];
+  if (r.entrada?.intermediario) linhas.push(["Maquininha", r.entrada.intermediario]);
+  if (r.receita) {
+    linhas.push(["Nome oficial", r.receita.razao_social]);
+    linhas.push(["CNPJ", formatarCnpj(r.receita.cnpj)]);
+    linhas.push(["Endereço", r.receita.endereco]);
+    linhas.push(["Atividade", r.receita.atividade]);
+    if (r.receita.mei) linhas.push(["Tipo", "MEI (microempreendedor)"]);
+  }
+
+  const fontes = [...(r.receita?.fonte ? [r.receita.fonte] : []), ...(r.fontes || [])];
+
+  return (
+    <Cartao aria-labelledby="res-loja">
+      <p className="rotulo">Achamos que é</p>
+      <h2 id="res-loja">{r.loja || "Não encontramos com certeza"}</h2>
+      <SeloCerteza nivel={r.certeza} />
+      <p>{[r.explicacao, r.aviso].filter(Boolean).join(" ")}</p>
+
+      {linhas.length > 0 && (
+        <dl className="dados">
+          {linhas.map(([k, v]) => (
+            <div key={k} style={{ display: "contents" }}>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
+      <div className="categoria">
+        <div className="campo">
+          <label htmlFor="categoria">Categoria sugerida</label>
+          <select id="categoria" value={categoria} onChange={(e) => { setCategoria(e.target.value); setSalvo(false); }}>
+            {CATEGORIAS.map((c) => <option key={c}>{c}</option>)}
+          </select>
+        </div>
+        <Botao onClick={() => setSalvo(true)} disabled={salvo}>
+          {salvo ? "Categoria salva ✓" : "Confirmar"}
+        </Botao>
+      </div>
+
+      <details className="fontes">
+        <summary>Ver as fontes ({fontes.length})</summary>
+        <ul>
+          {fontes.length === 0 && <li>Nenhuma fonte informada.</li>}
+          {fontes.map((f) => (
+            <li key={f}><a href={f} target="_blank" rel="noopener noreferrer">{f}</a></li>
+          ))}
+        </ul>
+      </details>
+
+      <div className="separador">
+        <p>Mesmo assim não reconhece essa compra?</p>
+        <Botao tipo="secundario" onClick={aoContestar}>Não reconheço, quero contestar</Botao>
+      </div>
+    </Cartao>
+  );
+}

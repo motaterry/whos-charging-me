@@ -1,0 +1,47 @@
+/* Design system: as cores, tamanhos e espaços ficam todos aqui.
+   Para mudar o visual do site inteiro, mude só este arquivo. */
+:root {
+  --cor-fundo: #f7f7f5;
+  --cor-superficie: #ffffff;
+  --cor-texto: #1d1d1b;
+  --cor-texto-suave: #5c5c58;
+  --cor-borda: #d9d9d4;
+  --cor-destaque: #1f5fd1;
+  --cor-sobre-destaque: #ffffff;
+  --cor-erro: #b42318;
+  --cor-certeza-alta: #1e7b34;
+  --cor-certeza-media: #9a6700;
+  --cor-certeza-baixa: #b42318;
+
+  --fonte: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --texto-p: 0.9rem;
+  --texto-m: 1.0625rem;
+  --texto-g: 1.4rem;
+  --texto-gg: 1.8rem;
+
+  --espaco-1: 4px;
+  --espaco-2: 8px;
+  --espaco-3: 12px;
+  --espaco-4: 16px;
+  --espaco-5: 24px;
+  --espaco-6: 32px;
+
+  --raio-p: 8px;
+  --raio-g: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cor-fundo: #151514;
+    --cor-superficie: #20201e;
+    --cor-texto: #f1f1ee;
+    --cor-texto-suave: #b3b3ad;
+    --cor-borda: #3a3a37;
+    --cor-destaque: #7aa7ff;
+    --cor-sobre-destaque: #0b1a33;
+    --cor-erro: #ff8a80;
+    --cor-certeza-alta: #6fd28a;
+    --cor-certeza-media: #f2c94c;
+    --cor-certeza-baixa: #ff8a80;
+  }
+}

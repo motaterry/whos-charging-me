@@ -1,68 +1,12 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Quem me cobrou?</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <main class="pagina">
-    <header>
-      <h1>Quem me cobrou?</h1>
-      <p class="sub">Viu um nome estranho na fatura do cartão? Digite aqui. A gente descobre qual é a loja.</p>
-    </header>
-
-    <form id="form" novalidate>
-      <label for="nome">Nome que aparece na fatura</label>
-      <input id="nome" name="nome" type="text" autocomplete="off" required
-             placeholder="Ex.: MP*CASADOPAODEQUEIJO" aria-describedby="nome-ajuda">
-      <p id="nome-ajuda" class="ajuda">Copie do jeito que está na fatura, com * e tudo.</p>
-
-      <label for="cidade">Cidade da compra <span class="opcional">(ajuda muito)</span></label>
-      <input id="cidade" name="cidade" type="text" autocomplete="address-level2" placeholder="Ex.: São Paulo">
-
-      <div class="botoes">
-        <button type="submit" id="buscar">Descobrir a loja</button>
-        <button type="button" id="limpar" class="secundario">Limpar</button>
-      </div>
-
-      <p class="exemplos">Testar com um exemplo:
-        <button type="button" class="link" data-nome="MP*CASADOPAODEQUEIJO" data-cidade="São Paulo">MP*CASADOPAODEQUEIJO</button>
-        <button type="button" class="link" data-nome="EBN*SPOTIFY" data-cidade="">EBN*SPOTIFY</button>
-      </p>
-    </form>
-
-    <section id="status" class="status" role="status" aria-live="polite" hidden></section>
-
-    <section id="resultado" class="cartao" hidden aria-labelledby="res-loja">
-      <p class="rotulo">Achamos que é</p>
-      <h2 id="res-loja"></h2>
-      <p id="res-certeza" class="selo"></p>
-      <p id="res-explicacao"></p>
-      <dl id="res-dados"></dl>
-
-      <div class="categoria">
-        <label for="res-categoria">Categoria sugerida</label>
-        <select id="res-categoria"></select>
-        <button type="button" id="confirmar">Confirmar</button>
-      </div>
-
-      <details>
-        <summary>Ver as fontes</summary>
-        <ul id="res-fontes"></ul>
-      </details>
-
-      <div class="nao-reconheco">
-        <p>Mesmo assim não reconhece essa compra?</p>
-        <a href="contestar.html" class="botao-secundario">Não reconheço, quero contestar</a>
-      </div>
-    </section>
-
-    <footer>
-      <p>Usamos dados públicos da Receita Federal e busca na internet. Sempre mostramos a fonte e o quanto temos certeza.</p>
-    </footer>
-  </main>
-  <script type="module" src="app.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quem me cobrou?</title>
+  </head>
+  <body>
+    <div id="raiz"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
