@@ -6,9 +6,11 @@
 // 2. Pede para a IA (pelo OpenRouter, com busca na web) achar a loja e o CNPJ.
 // 3. Confere o CNPJ em dados públicos da Receita (BrasilAPI; se falhar, CNPJ.ws; depois CNPJá).
 // 4. Devolve a loja, a fonte e o grau de certeza.
+// Se a loja for MEI, esconde o nome do dono, o CPF e a rua (ver lib/privacidade.js).
 
 import { limparNome } from "../lib/limpar-nome.js";
 import { conferirCnpj } from "../lib/receita.js";
+import { receitaPublica, lojaPublica, fontesPublicas, limparTexto, nomeDoDono } from "../lib/privacidade.js";
 
 const CATEGORIAS = [
   "Alimentação", "Mercado", "Transporte", "Saúde e farmácia", "Compras",
@@ -150,9 +152,26 @@ export default async function handler(req, res) {
     }
 
     // Se o banco mandou o local, compara com o endereço da Receita.
+    // MEI: o endereço costuma ser a casa do dono. Então usamos só o bairro e a cidade
+    // (um ponto aproximado), e a rua nem sai do servidor.
     let distancia = null;
+    let distanciaAproximada = false;
     const pontoCompra = local?.lat && local?.lon ? { lat: Number(local.lat), lon: Number(local.lon) } : null;
-    if (pontoCompra && receita?.endereco) {
+    if (pontoCompra && receita?.mei) {
+      const bairro = receita.bairro ? [receita.bairro, receita.municipio, receita.uf].filter(Boolean).join(", ") : null;
+      const pontoBairro = await acharCoordenadas(bairro);
+      if (pontoBairro) {
+        distanciaAproximada = true;
+        // Arredonda para 100 m: é só uma ideia de distância.
+        distancia = Math.round(distanciaMetros(pontoCompra, pontoBairro) / 100) * 100;
+        if (distancia <= 2000) {
+          aviso = `A loja é registrada no bairro ${receita.bairro}, perto de onde a compra foi feita.`;
+        } else if (distancia > 5000) {
+          certeza = "baixa";
+          aviso = `A loja é registrada no bairro ${receita.bairro}, a cerca de ${(distancia / 1000).toFixed(1)} km de onde a compra foi feita. Confira antes de confirmar.`;
+        }
+      }
+    } else if (pontoCompra && receita?.endereco) {
       const pontoLoja = await acharCoordenadas(receita.endereco);
       if (pontoLoja) {
         distancia = distanciaMetros(pontoCompra, pontoLoja);
@@ -166,18 +185,22 @@ export default async function handler(req, res) {
       }
     }
 
+    // MEI: tira o nome do dono e o CPF de tudo que vai para a tela.
+    const dono = receita?.mei ? nomeDoDono(receita.razao_social) : null;
+
     res.status(200).json({
       entrada: limpo,
-      loja: ia.loja,
+      loja: lojaPublica(ia.loja, receita),
       categoria: ia.categoria,
       certeza,
-      explicacao: ia.explicacao,
+      explicacao: receita?.mei ? limparTexto(ia.explicacao, dono) : ia.explicacao,
       aviso,
-      fontes: ia.fontes ?? [],
+      fontes: fontesPublicas(ia.fontes ?? [], receita),
       cnpj_sugerido: ia.cnpj ?? null, // o CNPJ que a IA achou, antes de conferir
-      receita, // null quando não deu para confirmar o CNPJ
+      receita: receitaPublica(receita), // null quando não deu para confirmar o CNPJ. MEI: sem nome oficial e sem rua.
       local, // o local que o banco mandou (ou null)
       distancia, // metros entre o local da compra e o endereço da Receita (ou null)
+      distancia_aproximada: distanciaAproximada, // true no MEI: medida até o centro do bairro
     });
   } catch (e) {
     res.status(502).json({ erro: e.message, entrada: limpo });
