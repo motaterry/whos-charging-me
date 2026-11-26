@@ -87,10 +87,9 @@ export default function Resultado({ r, aoContestar }) {
       </div>
 
       <details className="fontes">
-        <summary>Ver as fontes ({fontes.length + (protegido && r.receita.fonte_nome ? 1 : 0)})</summary>
+        <summary>Ver as fontes ({fontes.length})</summary>
         <ul>
-          {protegido && r.receita.fonte_nome && <li>Dados públicos da Receita, conferidos na {r.receita.fonte_nome} (link escondido porque mostra dados pessoais do dono)</li>}
-          {fontes.length === 0 && !protegido && <li>Nenhuma fonte informada.</li>}
+          {fontes.length === 0 && <li>Nenhuma fonte informada.</li>}
           {fontes.map((f) => (
             <li key={f}><a href={f} target="_blank" rel="noopener noreferrer">{f}</a></li>
           ))}
