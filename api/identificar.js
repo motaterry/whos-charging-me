@@ -81,8 +81,19 @@ async function perguntarIA(limpo, cidade) {
 async function conferirCnpj(cnpj) {
   const numeros = String(cnpj ?? "").replace(/\D/g, "");
   if (numeros.length !== 14) return null;
-  const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${numeros}`);
-  if (!resp.ok) return null;
+  let resp;
+  try {
+    resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${numeros}`, {
+      headers: { "User-Agent": "whos-charging-me" },
+    });
+  } catch (e) {
+    console.error("BrasilAPI falhou:", e.message);
+    return null;
+  }
+  if (!resp.ok) {
+    console.error("BrasilAPI respondeu", resp.status, "para", numeros);
+    return null;
+  }
   const d = await resp.json();
   return {
     cnpj: numeros,
@@ -128,6 +139,7 @@ export default async function handler(req, res) {
       certeza,
       explicacao: ia.explicacao,
       fontes: ia.fontes ?? [],
+      cnpj_sugerido: ia.cnpj ?? null, // o CNPJ que a IA achou, antes de conferir
       receita, // null quando não deu para confirmar o CNPJ
     });
   } catch (e) {
