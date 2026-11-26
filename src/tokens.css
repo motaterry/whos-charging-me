@@ -50,21 +50,5 @@
   --sombra-cartao: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --cor-fundo: #000000;
-    --cor-superficie: #272729;
-    --cor-texto: #ffffff;
-    --cor-texto-suave: #a1a1a6;
-    --cor-linha: #3a3a3c;
-    --cor-destaque: #2997ff;
-    --cor-destaque-foco: #2997ff;
-    --cor-sobre-destaque: #000000; /* texto preto no azul claro: contraste melhor */
-    --cor-erro: #ff6961;
-    --cor-erro-fundo: #3a1714;
-    --cor-certeza-alta: #6fd28a;
-    --cor-certeza-media: #f2c94c;
-    --cor-certeza-baixa: #ff6961;
-    --sombra-cartao: none;
-  }
-}
+/* O site fica sempre no modo claro (decisão da Terry, 26/11). */
+:root { color-scheme: light; }

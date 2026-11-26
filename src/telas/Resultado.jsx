@@ -3,6 +3,8 @@ import { useState } from "react";
 import Botao from "../componentes/Botao.jsx";
 import Cartao from "../componentes/Cartao.jsx";
 import SeloCerteza from "../componentes/SeloCerteza.jsx";
+import Ilustracao from "../componentes/Ilustracao.jsx";
+import Mapa from "../componentes/Mapa.jsx";
 import { CATEGORIAS } from "../api.js";
 
 function formatarCnpj(c) {
@@ -27,10 +29,21 @@ export default function Resultado({ r, aoContestar }) {
 
   return (
     <Cartao aria-labelledby="res-loja">
-      <p className="rotulo">Achamos que é</p>
+      {(r.certeza === "baixa" || !r.loja) && <Ilustracao nome="procurando" tamanho="p" />}
+      <p className="rotulo">{r.certeza === "baixa" || !r.loja ? "Não temos certeza. O mais provável é" : "Achamos que é"}</p>
       <h2 id="res-loja">{r.loja || "Não encontramos com certeza"}</h2>
       <SeloCerteza nivel={r.certeza} />
       <p>{[r.explicacao, r.aviso].filter(Boolean).join(" ")}</p>
+
+      {r.local?.lat && r.local?.lon && (
+        <div className="local-compra">
+          <h3>Onde a compra foi feita</h3>
+          <p className="ajuda-texto">
+            {[r.local.endereco, r.local.bairro, r.local.cidade].filter(Boolean).join(", ")} (informado pelo banco)
+          </p>
+          <Mapa lat={r.local.lat} lon={r.local.lon} titulo="Mapa do local da compra" />
+        </div>
+      )}
 
       {linhas.length > 0 && (
         <dl className="dados">
