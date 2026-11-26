@@ -102,7 +102,13 @@ async function conferirCnpj(cnpj) {
     situacao: d.descricao_situacao_cadastral,
     atividade: d.cnae_fiscal_descricao,
     mei: d.opcao_pelo_mei === true,
-    endereco: [d.descricao_tipo_de_logradouro, d.logradouro, d.numero, d.bairro, d.municipio, d.uf]
+    endereco: [
+      [d.descricao_tipo_de_logradouro, d.logradouro].filter(Boolean).join(" "),
+      String(d.logradouro ?? "").includes(String(d.numero ?? "")) ? null : d.numero,
+      d.bairro,
+      d.municipio,
+      d.uf,
+    ]
       .filter(Boolean)
       .join(", "),
     fonte: `https://brasilapi.com.br/api/cnpj/v1/${numeros}`,
