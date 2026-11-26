@@ -14,15 +14,24 @@ const CATEGORIAS = [
   "Assinaturas e serviços digitais", "Lazer", "Educação", "Casa", "Outros",
 ];
 
-function instrucoes(limpo, cidade) {
+// Texto sobre o local da compra, quando o banco manda.
+function textoLocal(local) {
+  if (!local) return "não informado";
+  const partes = [local.endereco, local.bairro, local.cidade, local.uf].filter(Boolean).join(", ");
+  const coords = local.lat && local.lon ? ` (latitude ${local.lat}, longitude ${local.lon})` : "";
+  return partes + coords;
+}
+
+function instrucoes(limpo, cidade, local) {
   return `Você ajuda pessoas a descobrir qual loja aparece com um nome estranho na fatura do cartão de crédito no Brasil.
 
 Nome na fatura: "${limpo.original}"
 Nome sem o prefixo: "${limpo.nome}"
 Empresa de pagamento (maquininha): ${limpo.intermediario ?? "não identificada"}
 Cidade da compra: ${cidade || "não informada"}
+Local da compra enviado pelo banco: ${textoLocal(local)}
 
-Procure na internet a loja mais provável. Tente achar o CNPJ (número de registro da empresa, 14 dígitos).
+Procure na internet a loja mais provável.${local ? " O banco informou onde a maquininha estava: procure a loja nesse endereço ou bem perto dele." : ""} Tente achar o CNPJ (número de registro da empresa, 14 dígitos).
 Não invente. Se não tiver certeza, diga que a certeza é baixa.
 
 Responda SOMENTE com um JSON neste formato:
@@ -49,7 +58,7 @@ function extrairJson(texto) {
   }
 }
 
-async function perguntarIA(limpo, cidade) {
+async function perguntarIA(limpo, cidade, local) {
   const chave = process.env.OPENROUTER_API_KEY;
   if (!chave) throw new Error("Falta a chave OPENROUTER_API_KEY no servidor.");
   const modelo = process.env.OPENROUTER_MODEL || "anthropic/claude-opus-5.5";
@@ -64,7 +73,7 @@ async function perguntarIA(limpo, cidade) {
     body: JSON.stringify({
       // ":online" liga a busca na web do OpenRouter.
       model: `${modelo}:online`,
-      messages: [{ role: "user", content: instrucoes(limpo, cidade) }],
+      messages: [{ role: "user", content: instrucoes(limpo, cidade, local) }],
     }),
   });
 
@@ -116,13 +125,43 @@ async function conferirCnpj(cnpj) {
   };
 }
 
+// Acha a latitude e longitude de um endereço no OpenStreetMap (grátis).
+async function acharCoordenadas(endereco) {
+  if (!endereco) return null;
+  try {
+    const url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=" + encodeURIComponent(endereco);
+    const resp = await fetch(url, {
+      headers: { "User-Agent": "whos-charging-me/0.3 (prototipo de hackathon)" },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!resp.ok) return null;
+    const [primeiro] = await resp.json();
+    return primeiro ? { lat: Number(primeiro.lat), lon: Number(primeiro.lon) } : null;
+  } catch (e) {
+    console.error("OpenStreetMap falhou:", e.message);
+    return null;
+  }
+}
+
+// Distância em metros entre dois pontos (fórmula de Haversine).
+export function distanciaMetros(a, b) {
+  const rad = (g) => (g * Math.PI) / 180;
+  const dLat = rad(b.lat - a.lat);
+  const dLon = rad(b.lon - a.lon);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
+  return Math.round(2 * 6371000 * Math.asin(Math.sqrt(h)));
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ erro: "Use POST." });
     return;
   }
 
-  const { nome, cidade } = req.body ?? {};
+  const { nome } = req.body ?? {};
+  // "local" é opcional: o banco manda onde a maquininha estava.
+  const local = req.body?.local && typeof req.body.local === "object" ? req.body.local : null;
+  const cidade = req.body?.cidade || local?.cidade || "";
   if (!nome || String(nome).trim().length < 2) {
     res.status(400).json({ erro: "Escreva o nome que aparece na fatura." });
     return;
@@ -131,7 +170,7 @@ export default async function handler(req, res) {
   const limpo = limparNome(nome);
 
   try {
-    const ia = await perguntarIA(limpo, cidade);
+    const ia = await perguntarIA(limpo, cidade, local);
     const receita = await conferirCnpj(ia.cnpj);
 
     // Se a Receita confirmou o CNPJ, a certeza pode subir um nível.
@@ -147,6 +186,23 @@ export default async function handler(req, res) {
       aviso = `A empresa achada fica em ${receita.municipio}, não em ${cidade}. Confira antes de confirmar.`;
     }
 
+    // Se o banco mandou o local, compara com o endereço da Receita.
+    let distancia = null;
+    const pontoCompra = local?.lat && local?.lon ? { lat: Number(local.lat), lon: Number(local.lon) } : null;
+    if (pontoCompra && receita?.endereco) {
+      const pontoLoja = await acharCoordenadas(receita.endereco);
+      if (pontoLoja) {
+        distancia = distanciaMetros(pontoCompra, pontoLoja);
+        if (distancia <= 500) {
+          certeza = "alta";
+          aviso = `O endereço na Receita fica a ${distancia} m de onde a compra foi feita.`;
+        } else if (distancia > 5000) {
+          certeza = "baixa";
+          aviso = `O endereço na Receita fica a ${(distancia / 1000).toFixed(1)} km de onde a compra foi feita. Confira antes de confirmar.`;
+        }
+      }
+    }
+
     res.status(200).json({
       entrada: limpo,
       loja: ia.loja,
@@ -157,6 +213,8 @@ export default async function handler(req, res) {
       fontes: ia.fontes ?? [],
       cnpj_sugerido: ia.cnpj ?? null, // o CNPJ que a IA achou, antes de conferir
       receita, // null quando não deu para confirmar o CNPJ
+      local, // o local que o banco mandou (ou null)
+      distancia, // metros entre o local da compra e o endereço da Receita (ou null)
     });
   } catch (e) {
     res.status(502).json({ erro: e.message, entrada: limpo });

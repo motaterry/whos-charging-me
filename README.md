@@ -47,6 +47,23 @@ Resposta: loja, categoria, certeza, explicação, fontes e dados da Receita.
 3. No computador: `npm install` e depois `npm run dev`.
 4. Testes: `npm test`
 
+## Simular banco
+
+Na tela inicial tem a aba **Simular banco**. Ela mostra uma fatura de exemplo, como um banco mandaria para a nossa API: o nome estranho e o local onde a maquininha estava (endereço e coordenadas).
+
+Com o local, o servidor:
+1. Pede para a IA procurar a loja naquele endereço.
+2. Acha no OpenStreetMap as coordenadas do endereço que está na Receita.
+3. Mede a distância entre os dois pontos. Até 500 m, a certeza vira alta. Mais de 5 km, vira baixa.
+
+A tela mostra um mapa do OpenStreetMap com o ponto da compra.
+
+## Créditos
+
+As ilustrações são do pacote **Financial Delight**, da Terry Mota (designer do time). Usadas com permissão da autora.
+
+Mapas: © colaboradores do [OpenStreetMap](https://www.openstreetmap.org/copyright).
+
 ## Time
 
 Terry, Aline e Rafael.

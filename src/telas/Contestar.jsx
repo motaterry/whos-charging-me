@@ -11,6 +11,7 @@ import Cartao from "../componentes/Cartao.jsx";
 import Lista from "../componentes/Lista.jsx";
 import Opcao from "../componentes/Opcao.jsx";
 import Passos from "../componentes/Passos.jsx";
+import Ilustracao from "../componentes/Ilustracao.jsx";
 import { contestar } from "../api.js";
 
 const BANCOS = ["C6 Bank", "Nubank", "Itaú", "Bradesco", "Santander", "Banco do Brasil", "Caixa", "Inter", "Outro"];
@@ -214,9 +215,14 @@ export default function Contestar({ nomeFatura, loja, aoVoltar }) {
                 </p>
               </Cartao>
 
-              <div className="grupo-botoes">
-                <Botao tipo="secundario" onClick={aoVoltar}>Voltar ao início</Botao>
-              </div>
+              <Cartao>
+                <div className="fim">
+                  <Ilustracao nome="torcendo" tamanho="p" />
+                  <h3>Pronto! Agora é com o banco.</h3>
+                  <p className="ajuda-texto">Guarde o número de protocolo. Se o banco não responder, siga os passos acima.</p>
+                  <Botao tipo="secundario" onClick={aoVoltar}>Voltar ao início</Botao>
+                </div>
+              </Cartao>
             </>
           )}
         </>
