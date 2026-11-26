@@ -32,6 +32,7 @@ export default function Resultado({ r, aoContestar }) {
     linhas.push(["Nome oficial", r.receita.razao_social]);
     linhas.push(["CNPJ", formatarCnpj(r.receita.cnpj)]);
     linhas.push(["Endereço", r.receita.endereco]);
+    if (r.receita.telefone) linhas.push(["Telefone", r.receita.telefone]);
     linhas.push(["Atividade", r.receita.atividade]);
     if (r.receita.mei) linhas.push(["Tipo", "MEI (microempreendedor)"]);
   }
@@ -69,7 +70,7 @@ export default function Resultado({ r, aoContestar }) {
 
       {protegido && (
         <p className="ajuda-texto">
-          🔒 É {r.receita.mei ? "um MEI" : "uma empresa de uma pessoa só"}. Para proteger quem é dono do negócio, mostramos só os primeiros nomes. Não mostramos sobrenome, CPF nem endereço completo (LGPD).
+          🔒 É {r.receita.mei ? "um MEI" : "uma empresa de uma pessoa só"}. Para proteger quem é dono do negócio, mostramos só os primeiros nomes. Não mostramos sobrenome, CPF, telefone nem endereço completo (LGPD).
         </p>
       )}
 
