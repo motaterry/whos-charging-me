@@ -176,3 +176,31 @@ h3 { font-size: var(--texto-chamada); font-weight: 600; margin: 0 0 var(--espaco
 .mapa { margin: var(--espaco-3) 0 0; }
 .mapa iframe { display: block; width: 100%; height: 220px; border: 0; border-radius: var(--raio-m); background: var(--cor-linha); }
 .mapa figcaption { margin-top: var(--espaco-1); font-size: var(--texto-legenda); }
+
+/* Componente: Selecao (lista de opções própria) */
+.selecao { position: relative; }
+.selecao__botao {
+  width: 100%; height: 48px; padding: 0 16px 0 20px; display: flex; align-items: center; justify-content: space-between; gap: var(--espaco-3);
+  font: inherit; color: var(--cor-texto); letter-spacing: inherit; text-align: left; cursor: pointer;
+  background: var(--cor-superficie); border: 1px solid var(--cor-linha); border-radius: var(--raio-m);
+}
+.selecao__botao span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selecao__botao--vazio span { color: var(--cor-texto-suave); }
+.selecao__botao:focus-visible, .selecao__botao[aria-expanded="true"] {
+  border-color: var(--cor-destaque); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-destaque) 30%, transparent);
+}
+.selecao__seta { flex: none; width: 12px; height: 8px; margin-right: 4px; color: var(--cor-texto-suave); transition: transform 0.2s; }
+.selecao__botao[aria-expanded="true"] .selecao__seta { transform: rotate(180deg); }
+.selecao__lista {
+  position: absolute; z-index: 10; left: 0; right: 0; top: calc(100% + 6px); margin: 0; padding: 6px; list-style: none;
+  max-height: 300px; overflow-y: auto; background: var(--cor-superficie); border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-g); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+.selecao__opcao {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--espaco-3);
+  min-height: 44px; padding: 0 14px; border-radius: var(--raio-m); cursor: pointer;
+}
+.selecao__opcao--ativa { background: color-mix(in srgb, var(--cor-destaque) 10%, transparent); }
+.selecao__opcao[aria-selected="true"] { color: var(--cor-destaque); font-weight: 600; }
+.selecao__marca { flex: none; width: 14px; height: 10px; }
+@media (prefers-reduced-motion: reduce) { .selecao__seta { transition: none; } }
