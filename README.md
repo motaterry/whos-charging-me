@@ -26,6 +26,7 @@ O site é feito em **React** (uma biblioteca para montar telas com peças reutil
 | `src/App.jsx` | Guarda o que a pessoa digitou e escolhe qual tela mostrar |
 | `src/api.js` | Manda o nome para o servidor |
 | `api/identificar.js` | O servidor: recebe o nome e devolve a loja |
+| `api/contestar.js` | O servidor: monta o passo a passo do banco e o texto pronto |
 | `lib/limpar-nome.js` | Tira o prefixo da maquininha |
 
 ## API para bancos

@@ -93,3 +93,39 @@ a { color: var(--cor-destaque); }
 .separador { margin-top: var(--espaco-5); padding-top: var(--espaco-5); border-top: 1px solid var(--cor-linha); }
 .separador p { margin: 0 0 var(--espaco-3); }
 .exemplos { color: var(--cor-texto-suave); font-size: var(--texto-legenda); margin-top: var(--espaco-4); }
+
+/* Componente: Passos */
+.passos { margin: var(--espaco-3) 0 var(--espaco-5); }
+.passos__texto { margin: 0 0 var(--espaco-2); color: var(--cor-texto-suave); font-size: var(--texto-legenda); }
+.passos__barra { height: 4px; background: var(--cor-linha); border-radius: var(--raio-pilula); overflow: hidden; }
+.passos__barra span { display: block; height: 100%; background: var(--cor-destaque); transition: width 0.3s; }
+
+/* Componente: Opcao */
+.grupo-opcoes { border: 0; padding: 0; margin: var(--espaco-4) 0 0; display: grid; gap: var(--espaco-3); }
+.opcao {
+  display: flex; gap: var(--espaco-3); align-items: flex-start; padding: var(--espaco-4);
+  background: var(--cor-superficie); border: 2px solid transparent; border-radius: var(--raio-g); cursor: pointer;
+}
+.opcao input { margin-top: 4px; accent-color: var(--cor-destaque); width: 18px; height: 18px; }
+.opcao--escolhida { border-color: var(--cor-destaque); }
+.opcao:focus-within { outline: 3px solid var(--cor-destaque-foco); outline-offset: 2px; }
+.opcao__descricao { display: block; color: var(--cor-texto-suave); font-size: var(--texto-legenda); margin-top: 2px; }
+
+/* Componente: Lista */
+.lista { list-style: none; padding: 0; margin: var(--espaco-4) 0; display: grid; gap: var(--espaco-3); }
+.lista li { display: flex; gap: var(--espaco-3); align-items: flex-start; }
+.lista__numero {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--cor-destaque) 14%, transparent); color: var(--cor-destaque);
+  font-size: var(--texto-legenda); font-weight: 600;
+}
+
+/* Tela: Contestar */
+h3 { font-size: var(--texto-chamada); font-weight: 600; margin: 0 0 var(--espaco-2); }
+.subtitulo-p { color: var(--cor-texto-suave); margin: 0; }
+.ajuda-texto { color: var(--cor-texto-suave); font-size: var(--texto-legenda); }
+.texto-pronto {
+  white-space: pre-wrap; font: inherit; font-size: var(--texto-legenda); background: var(--cor-fundo);
+  padding: var(--espaco-4); border-radius: var(--raio-m); margin: var(--espaco-3) 0 0;
+}
+.visualmente-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

@@ -50,7 +50,11 @@ export default function App() {
       </header>
 
       {tela === "contestar" ? (
-        <Contestar aoVoltar={() => setTela("busca")} />
+        <Contestar
+          nomeFatura={nome || resultado?.entrada?.original || ""}
+          loja={resultado?.loja}
+          aoVoltar={() => setTela("busca")}
+        />
       ) : (
         <>
           <Busca
