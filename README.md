@@ -64,6 +64,14 @@ As ilustrações são do pacote **Financial Delight**, da Terry Mota (designer d
 
 Mapas: © colaboradores do [OpenStreetMap](https://www.openstreetmap.org/copyright).
 
+## Licença
+
+O código usa a licença [PolyForm Noncommercial 1.0.0](LICENSE).
+
+- Pode ler, rodar, testar e estudar o código.
+- Pode usar para fins não comerciais, como estudo, pesquisa ou uso pessoal.
+- Para uso comercial, por exemplo dentro de um banco ou de um produto pago, fale com o time.
+
 ## Time
 
 Terry, Aline e Rafael.
