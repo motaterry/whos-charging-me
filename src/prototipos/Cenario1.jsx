@@ -69,7 +69,7 @@ export default function Cenario1() {
       aviso="Conceito. Sem vínculo com o banco."
       telas={TELAS} atual={nav.atual} irPara={irPara}
       aoVoltar={nav.voltar} podeVoltar={nav.tamanho > 1} aoRecomecar={recomecar}
-      nota={NOTAS[nav.atual]} erros={ERROS} erroAtual={erro} claro={false}
+      nota={NOTAS[nav.atual]} erros={ERROS} erroAtual={erro} claro={nav.atual !== "inicio"}
     >
       <div className="b1 c6" style={coresCss(BANCO_FICTICIO)}>
         <Aviso texto={aviso?.texto} acao={aviso?.acao} aoAcao={aviso?.aoAcao} aoFechar={fecharAviso} />
@@ -240,7 +240,6 @@ function CartaoCarbon({ pequeno = false }) {
 // ---------- Tela 1: cartão e fatura ----------
 function Cartao({ movida, reconhecida, contestada, aoTocar, aoInicio, aoBloqueado }) {
   const identificada = movida || reconhecida || contestada;
-  const estranhas = identificada ? 1 : 2;
   return (
     <div className="ui-rolagem ui-rolagem--com-tabs c6-tela">
       <C6Barra titulo="Cartões" />
@@ -266,16 +265,6 @@ function Cartao({ movida, reconhecida, contestada, aoTocar, aoInicio, aoBloquead
           <Toque className="ui-botao ui-botao--principal ui-botao--largo c6-espaco" onClick={aoBloqueado}>Pagar fatura</Toque>
         </section>
 
-        <AnimatePresence>
-          {estranhas > 0 && (
-            <motion.button type="button" className="c6-dica" onClick={aoTocar}
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }} transition={{ delay: 0.5 }} whileTap={{ scale: 0.98 }}>
-              <span className="c6-dica__icone"><Icone nome="busca" tamanho={20} /></span>
-              <span><strong>{estranhas === 1 ? "1 compra" : "2 compras"} com nome estranho</strong><small>Toque para descobrir quem cobrou</small></span>
-              <Icone nome="seta" tamanho={18} />
-            </motion.button>
-          )}
-        </AnimatePresence>
 
         <ul className="c6-atalhos c6-atalhos--cartao" aria-label="Atalhos do cartão">
           {[["cartao", "Cartão virtual"], ["grafico", "Ajustar limite"], ["cadeado", "Senha"], ["mais", "Mais"]].map(([i, n]) => (

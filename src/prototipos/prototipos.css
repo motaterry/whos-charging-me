@@ -1058,3 +1058,18 @@
 .c6-campos__cru { text-transform: uppercase; }
 .c6-pilula { flex: none; min-height: 40px; padding: 0 var(--ep-4); border: 0; border-radius: 99px; background: #f0f0f2; color: #1d1d1f; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 .c6-pilula--amarela { background: var(--cor-destaque); }
+/* Barra de cima branca nas telas internas, como no app atual do C6 (Terry, 27/11). A tela inicial continua com o topo preto. */
+.c6 .ui-tela::after { background: #fff; }
+.c6 .ui-tela:has(.c6-inicio)::after { background: #000; }
+.c6 .ui-tela:has(.c6-recibo-tela), .c6 .ui-tela:has(.c6-recibo-tela)::after { background: #77777c; }
+.ui-iphone__tela:has(.c6) .ui-iphone__barra { background: #1d1d1f; }
+.c6-tela { background: #fff; }
+.c6-recibo-tela { background: #77777c; }
+.c6-barra { background: #fff; color: #1d1d1f; }
+.c6-barra__voltar { color: #1d1d1f; }
+.c6-barra__titulo { font-weight: 600; }
+.c6-tela:not(.c6-recibo-tela) .c6-corpo { border-radius: 0; margin-top: 0; }
+.c6-tela:not(.c6-recibo-tela) .c6-corpo__pegador { display: none; }
+.c6-cartao-topo { color: #1d1d1f; padding-bottom: var(--ep-4); }
+.c6-cartao-topo__info { color: var(--c6-suave); }
+.c6-cartao-topo__info span { color: #1d1d1f; }
