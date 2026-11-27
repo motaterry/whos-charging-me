@@ -14,10 +14,11 @@ import { BANCO_FICTICIO, coresCss } from "./marca.js";
 import { RESPOSTA_PADARIA as R, API_PEDIDO, API_RESPOSTA } from "./dados.js";
 
 const TELAS = [
-  { id: "cartao", nome: "Cartão no app do banco" },
-  { id: "detalhe", nome: "Quem cobrou (loja achada)" },
-  { id: "contestar", nome: "Contestar com provas" },
-  { id: "enviado", nome: "Contestação enviada" },
+  // "acao" = o que a pessoa faz nesta tela para seguir no caminho feliz (aparece no user flow do Guia).
+  { id: "cartao", nome: "Cartão no app do banco", acao: "Toca na compra de nome estranho (MP*PADARIABOMDIA)" },
+  { id: "detalhe", nome: "Quem cobrou (loja achada)", acao: "Vê a loja e toca em \"Não reconheço\"", alternativa: "Ou toca em \"Reconheço esta compra\": a compra fica marcada e volta ao cartão" },
+  { id: "contestar", nome: "Contestar com provas", acao: "Escolhe o motivo, revisa e confirma o envio" },
+  { id: "enviado", nome: "Contestação enviada", acao: "Fim: guarda o protocolo e volta ao cartão" },
 ];
 
 const NOTAS = {
@@ -51,10 +52,10 @@ export default function Cenario1() {
   function irPara(t) { setErro(null); nav.trocar("cartao"); const ordem = TELAS.map((x) => x.id); ordem.slice(1, ordem.indexOf(t) + 1).forEach((x) => nav.ir(x)); }
 
   const ERROS = [
-    { id: "api", nome: "Nossa API fora do ar", descricao: "A busca falha. A pessoa pode tentar de novo ou contestar mesmo assim.", acao: comErro("detalhe", "api") },
-    { id: "baixa", nome: "Loja sem certeza", descricao: "Duas lojas parecidas, longe do local. Mostramos a dúvida.", acao: comErro("detalhe", "baixa") },
-    { id: "motivo", nome: "Esqueceu o motivo", descricao: "Toque em \"Revisar\" sem escolher o que aconteceu.", acao: comErro("contestar", "motivo") },
-    { id: "envio", nome: "Falha ao enviar", descricao: "O envio falha na 1ª vez. Nada se perde. Na 2ª tentativa funciona.", acao: comErro("contestar", "envio") },
+    { id: "api", tela: "detalhe", nome: "Nossa API fora do ar", descricao: "A busca falha. A pessoa pode tentar de novo ou contestar mesmo assim.", acao: comErro("detalhe", "api") },
+    { id: "baixa", tela: "detalhe", nome: "Loja sem certeza", descricao: "Duas lojas parecidas, longe do local. Mostramos a dúvida.", acao: comErro("detalhe", "baixa") },
+    { id: "motivo", tela: "contestar", nome: "Esqueceu o motivo", descricao: "Toque em \"Revisar\" sem escolher o que aconteceu.", acao: comErro("contestar", "motivo") },
+    { id: "envio", tela: "contestar", nome: "Falha ao enviar", descricao: "O envio falha na 1ª vez. Nada se perde. Na 2ª tentativa funciona.", acao: comErro("contestar", "envio") },
   ];
 
   return (

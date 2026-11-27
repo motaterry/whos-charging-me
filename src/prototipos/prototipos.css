@@ -88,24 +88,31 @@
 .proto__botao:disabled { opacity: .4; cursor: not-allowed; }
 .proto__nota { padding: var(--ep-4); background: #fff; border-radius: 16px; }
 .proto__nota p { margin: 0; font-size: 15px; line-height: 1.5; }
-.proto__erros p { margin: 0 0 var(--ep-3); font-size: 13px; color: var(--cor-texto-suave); }
-.proto__erros ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--ep-2); }
-.proto__erro {
-  width: 100%; height: 100%; display: grid; align-content: start; gap: var(--ep-1); text-align: left; padding: var(--ep-3); cursor: pointer;
-  background: #fff; border: 1.5px solid transparent; border-radius: 12px; font: inherit; color: var(--cor-texto);
-  transition: border-color .15s, background .15s;
-}
-.proto__erro strong { font-size: 14px; }
-.proto__erro span { color: var(--cor-texto-suave); font-size: 12px; line-height: 1.35; }
-.proto__erro:hover { border-color: #f2a5a1; }
-.proto__erro--ativo { border-color: var(--ui-vermelho); background: #fff1f0; }
-.proto__lista ol { list-style: none; padding: 0; margin: 0; background: #fff; border-radius: 16px; overflow: hidden; }
-.proto__lista li + li { border-top: 1px solid #f0f0f3; }
-.proto__lista button { width: 100%; display: flex; align-items: center; gap: var(--ep-3); min-height: 44px; padding: 0 var(--ep-4); background: none; border: 0; font: inherit; font-size: 15px; color: var(--cor-texto); cursor: pointer; text-align: left; }
-.proto__lista button:hover { background: #f7f7f9; }
-.proto__lista-num { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: #f0f0f3; font-size: 12px; font-weight: 700; flex: none; }
-.proto__lista [aria-current="step"] { font-weight: 700; color: var(--cor-destaque); }
-.proto__lista [aria-current="step"] .proto__lista-num { background: var(--cor-destaque); color: #fff; }
+/* User flow dentro do Guia: linha vertical verde = caminho feliz; desvios vermelhos = erros */
+.proto-fluxo__legenda { display: flex; flex-wrap: wrap; gap: var(--ep-1) var(--ep-4); margin: 0 0 var(--ep-3); font-size: 12px; color: var(--cor-texto-suave); }
+.proto-fluxo__legenda span { display: inline-flex; align-items: center; gap: var(--ep-2); }
+.proto-fluxo__amostra { display: inline-block; width: 16px; height: 4px; border-radius: 2px; }
+.proto-fluxo__amostra--feliz { background: var(--ui-verde); }
+.proto-fluxo__amostra--erro { background: none; border-top: 2px dashed var(--ui-vermelho); height: 0; }
+.proto-fluxo__lista { list-style: none; margin: 0; padding: var(--ep-4); background: #fff; border-radius: 16px; }
+.proto-fluxo__passo { position: relative; display: grid; grid-template-columns: 28px 1fr; gap: var(--ep-3); padding-bottom: var(--ep-4); }
+.proto-fluxo__passo--fim { padding-bottom: 0; }
+/* a linha que liga um passo ao próximo, com a ponta de seta */
+.proto-fluxo__passo:not(.proto-fluxo__passo--fim)::before { content: ""; position: absolute; left: 13px; top: 30px; bottom: 4px; width: 2px; background: var(--ui-verde); border-radius: 1px; }
+.proto-fluxo__passo:not(.proto-fluxo__passo--fim)::after { content: ""; position: absolute; left: 9px; bottom: 2px; border: 5px solid transparent; border-top: 6px solid var(--ui-verde); border-bottom: 0; }
+.proto-fluxo__no { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #e7f6ec; color: #1e7b34; font-size: 13px; font-weight: 700; position: relative; z-index: 1; }
+.proto-fluxo__passo--aqui .proto-fluxo__no { background: var(--cor-destaque); color: #fff; box-shadow: 0 0 0 4px color-mix(in srgb, var(--cor-destaque) 20%, transparent); }
+.proto-fluxo__corpo { min-width: 0; padding-top: var(--ep-1); }
+.proto-fluxo__tela { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ep-2); padding: 0; border: 0; background: none; font: inherit; color: var(--cor-texto); cursor: pointer; text-align: left; }
+.proto-fluxo__tela strong { font-size: 15px; }
+.proto-fluxo__tela:hover strong { color: var(--cor-destaque); text-decoration: underline; }
+.proto-fluxo__voce { padding: 2px var(--ep-2); border-radius: 99px; background: color-mix(in srgb, var(--cor-destaque) 12%, #fff); color: var(--cor-destaque); font-size: 11px; font-weight: 700; }
+.proto-fluxo__acao { margin: var(--ep-1) 0 0; font-size: 13px; color: var(--cor-texto-suave); line-height: 1.4; }
+.proto-fluxo__alt { margin: var(--ep-1) 0 0; font-size: 12px; color: var(--cor-texto-suave); font-style: italic; line-height: 1.4; }
+.proto-fluxo__desvios { list-style: none; margin: var(--ep-2) 0 0; padding: 0 0 0 var(--ep-3); display: flex; flex-wrap: wrap; gap: var(--ep-2); border-left: 2px dashed #f2a5a1; }
+.proto-fluxo__desvio { display: inline-flex; align-items: center; gap: var(--ep-1); min-height: 28px; padding: 0 var(--ep-3); border-radius: 99px; border: 1px solid #f5c6c3; background: #fff6f5; color: #b3261e; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.proto-fluxo__desvio:hover { border-color: var(--ui-vermelho); }
+.proto-fluxo__desvio--ativo { background: var(--ui-vermelho); border-color: var(--ui-vermelho); color: #fff; }
 
 /* ===== iPhone ===== */
 .ui-iphone {
@@ -523,8 +530,7 @@
 
 /* ===== Tela pequena (celular de verdade): o protótipo ocupa a tela toda ===== */
 @media (max-width: 860px) {
-  .proto__erros ul { grid-template-columns: 1fr; }
-}
+  }
 @media (max-width: 480px) {
   .proto { padding: 40px 0 0; background: #f2f2f7; }
   .proto__faixa-texto { display: none; }
