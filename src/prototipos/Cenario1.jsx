@@ -11,6 +11,7 @@ import {
   PassosAnalise, listaEmSequencia, itemEmSequencia, MOLA,
 } from "./ui/kit.jsx";
 import { BANCO_FICTICIO, coresCss } from "./marca.js";
+import logoC6 from "../assets/prototipos/c6-logo-branco.png";
 import { RESPOSTA_PADARIA as R, API_PEDIDO, API_RESPOSTA } from "./dados.js";
 
 const TELAS = [
@@ -123,7 +124,7 @@ function BarraC6({ ativa, claro = false, aoIr = {}, aoBloqueado }) {
   return (
     <nav className={`c6-tabs${claro ? " c6-tabs--claro" : ""}`} aria-label="Menu do banco">
       {abas.map(([i, n]) => {
-        if (i === "c6") return <button key={n} type="button" className="c6-tabs__marca" aria-label="Menu C6" onClick={aoBloqueado}>C6</button>;
+        if (i === "c6") return <button key={n} type="button" className="c6-tabs__marca" aria-label="Menu C6" onClick={aoBloqueado}><img src={logoC6} alt="" /></button>;
         const ativo = n === ativa;
         return (
           <button key={n} type="button" className={`c6-tabs__item${ativo ? " c6-tabs__item--ativo" : ""}`}
@@ -236,7 +237,7 @@ function Cartao({ movida, reconhecida, contestada, aoTocar, aoInicio, aoBloquead
       <motion.div className="b1-meu-cartao" initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ ...MOLA, delay: 0.05 }}>
         <span className="b1-cartao" aria-hidden="true">
           <span className="b1-cartao__brilho" />
-          <span className="b1-cartao__sigla">{BANCO_FICTICIO.sigla}</span>
+          <img className="b1-cartao__logo" src={logoC6} alt="" />
           <span className="b1-cartao__chip" />
         </span>
         <span className="b1-meu-cartao__texto">

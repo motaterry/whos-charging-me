@@ -881,3 +881,7 @@
 .proto__aviso-conceito { font-size: 11px; color: #a1a1a6; white-space: nowrap; }
 @media (max-width: 480px) { .proto__aviso-conceito { display: none; } }
 .ui-iphone__tela:has(.c6-inicio) .ui-iphone__barra { background: #1d1d1f; }
+/* Logo do C6 (aprovado pela Terry em 27/11) */
+.c6-tabs__marca { display: grid; place-items: center; }
+.c6-tabs__marca img { height: 15px; width: auto; display: block; }
+.b1-cartao__logo { position: absolute; left: 7px; top: 6px; height: 9px; width: auto; }
