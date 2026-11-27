@@ -154,6 +154,17 @@ function Cartao({ movida, reconhecida, contestada, aoTocar, aoBloqueado }) {
         <button type="button" className="b1-link" onClick={aoBloqueado}>Bloquear</button>
       </motion.div>
 
+      <AnimatePresence>
+        {estranhas > 0 && (
+          <motion.button type="button" className="b1-dica" onClick={aoTocar}
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }} transition={{ delay: 0.5 }} whileTap={{ scale: 0.98 }}>
+            <span className="b1-dica__icone"><Icone nome="brilho" tamanho={20} /></span>
+            <span><strong>{estranhas === 1 ? "1 compra" : "2 compras"} com nome estranho</strong><small>Toque para descobrir quem cobrou</small></span>
+            <Icone nome="seta" tamanho={18} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       <section className="b1-fatura" aria-label="Fatura aberta">
         <div className="b1-fatura__cabeca">
           <p className="b1-fatura__rotulo">Fatura aberta</p>
@@ -170,16 +181,6 @@ function Cartao({ movida, reconhecida, contestada, aoTocar, aoBloqueado }) {
         <Toque className="ui-botao ui-botao--principal ui-botao--largo b1-fatura__pagar" onClick={aoBloqueado}>Pagar fatura</Toque>
       </section>
 
-      <AnimatePresence>
-        {estranhas > 0 && (
-          <motion.button type="button" className="b1-dica" onClick={aoTocar}
-            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }} transition={{ delay: 0.5 }} whileTap={{ scale: 0.98 }}>
-            <span className="b1-dica__icone"><Icone nome="brilho" tamanho={20} /></span>
-            <span><strong>{estranhas === 1 ? "1 compra" : "2 compras"} com nome estranho</strong><small>Toque para descobrir quem cobrou</small></span>
-            <Icone nome="seta" tamanho={18} />
-          </motion.button>
-        )}
-      </AnimatePresence>
 
       <ul className="b1-atalhos" aria-label="Atalhos do cartão">
         {[["cartao", "Cartão virtual"], ["grafico", "Ajustar limite"], ["cadeado", "Senha"], ["mais", "Mais opções"]].map(([i, n]) => (
@@ -293,7 +294,6 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
               <h3 id="quem-titulo">Não conseguimos descobrir a loja agora</h3>
               <p>O serviço que procura a loja não respondeu. A compra continua na sua fatura e nada mudou.</p>
               <p className="ui-suave">Tente de novo em alguns segundos, ou conteste mesmo assim.</p>
-              <Toque className="ui-botao ui-botao--principal ui-botao--largo" onClick={() => { setFase("analisando"); aoTentarDeNovo(); }}>Tentar de novo</Toque>
             </motion.div>
           ) : (
             <motion.div key="ok" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={MOLA}>
@@ -362,8 +362,18 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
       )}
 
       <div className="ui-acoes-fixas">
-        <Toque className="ui-botao ui-botao--principal" disabled={!pronto} onClick={aoReconhecer}>Reconheço esta compra</Toque>
-        <Toque className="ui-botao ui-botao--perigo" onClick={aoContestar}>Não reconheço</Toque>
+        {pronto && falhou ? (
+          <>
+            {/* Com erro, a ação principal é tentar de novo (ajuda a sair do erro) */}
+            <Toque className="ui-botao ui-botao--principal" onClick={() => { setFase("analisando"); aoTentarDeNovo(); }}>Tentar de novo</Toque>
+            <Toque className="ui-botao ui-botao--perigo" onClick={aoContestar}>Contestar mesmo assim</Toque>
+          </>
+        ) : (
+          <>
+            <Toque className="ui-botao ui-botao--principal" disabled={!pronto} onClick={aoReconhecer}>Reconheço esta compra</Toque>
+            <Toque className="ui-botao ui-botao--perigo" onClick={aoContestar}>Não reconheço</Toque>
+          </>
+        )}
       </div>
     </div>
   );

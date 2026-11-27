@@ -23,7 +23,7 @@ const TELAS = [
   { id: "permissao", nome: "Permissão (Open Finance)", acao: "Lê o que vamos ver e autoriza no app do banco" },
   { id: "painel", nome: "Painel", acao: "Toca na compra que precisa de atenção" },
   { id: "compra", nome: "Compra sem certeza", acao: "Toca em \"Não reconheço, quero contestar\"" },
-  { id: "contestar", nome: "Contestar", acao: "Copia o texto, contesta no app do banco e toca em \"Já enviei\"" },
+  { id: "contestar", nome: "Contestar", acao: "Toca em \"Copiar e abrir o banco\", contesta lá e depois toca em \"Já enviei\"" },
   { id: "acompanhar", nome: "Acompanhar o estorno", acao: "Fim: acompanha até o dinheiro voltar" },
 ];
 
@@ -499,7 +499,7 @@ function Painel({ erro, escolhas, aoTentarDeNovo, aoAbrir, aoBloqueado }) {
                 <p className="b2-saldo__rotulo"><Icone nome="brilho" tamanho={15} /> Compras com nome estranho · novembro</p>
                 <div className="b2-saldo__linha">
                   <p id="estranhas" className="b2-saldo__numero">{compras.length}</p>
-                  <Toque className="ui-botao ui-botao--principal b2-saldo__botao" onClick={aoBloqueado}>+ Banco</Toque>
+                  <Toque className="ui-botao b2-botao-cinza b2-saldo__botao" onClick={aoBloqueado}>+ Banco</Toque>
                 </div>
                 <p className="b2-saldo__texto">
                   {compras.length - semCerteza} já identificadas{semCerteza ? <> · <em>{semCerteza} precisa de você</em></> : ""}
@@ -508,7 +508,7 @@ function Painel({ erro, escolhas, aoTentarDeNovo, aoAbrir, aoBloqueado }) {
               {/* 3 botões lado a lado: 1 principal e 2 cinza */}
               <div className="b2-tres">
                 <Toque className="ui-botao ui-botao--principal" onClick={semCerteza ? aoAbrir : aoBloqueado}>Resolver</Toque>
-                <Toque className="ui-botao b2-botao-cinza" onClick={aoBloqueado}>Contestações</Toque>
+                <Toque className="ui-botao b2-botao-cinza" onClick={aoBloqueado}>Gastos</Toque>
                 <Toque className="ui-botao b2-botao-cinza" onClick={aoBloqueado}>Relatório</Toque>
               </div>
               {/* Abas de texto com traço embaixo da aba ativa */}
@@ -533,13 +533,13 @@ function Painel({ erro, escolhas, aoTentarDeNovo, aoAbrir, aoBloqueado }) {
                       <Icone nome={atencao ? "interrogacao" : c.id === "padaria" ? "pao" : "lanche"} tamanho={20} />
                     </span>
                     <span className="b2-compra__meio">
-                      <strong>{c.loja || "Não sabemos com certeza"}</strong>
+                      <strong>{c.loja || "Loja não confirmada"}</strong>
                       <small><code>{c.nome}</code></small>
                       <small><LogoBanco nome={c.banco} tamanho={14} /> {c.banco} · {c.data}</small>
                     </span>
                     <span className="b2-compra__dir">
                       <strong>{c.valor}</strong>
-                      <span className={`b2-selo b2-selo--${c.certeza}`}>{{ alta: "Alta", media: "Média", baixa: "Baixa" }[c.certeza]}</span>
+                      <span className={`b2-selo b2-selo--${c.certeza}`}>{{ alta: "Certeza alta", media: "Certeza média", baixa: "Certeza baixa" }[c.certeza]}</span>
                     </span>
                   </motion.button>
                 </motion.li>
@@ -600,12 +600,6 @@ function Compra({ aoVoltar, aoContestar, aoReconhecer }) {
         <p className="b2-detalhe__valor">R$ 89,90</p>
         <p className="b2-detalhe__status"><Icone nome="interrogacao" tamanho={16} traco={2.4} /> Não sabemos quem cobrou</p>
       </div>
-      <dl className="ui-cartao ui-dados b2-detalhe__dados">
-        <div><dt>Nome na fatura</dt><dd><code>INT*XQZ7 SERVICOS</code></dd></div>
-        <div><dt>Data</dt><dd>20 nov, 14:32</dd></div>
-        <div><dt>Banco</dt><dd>{BANCO}</dd></div>
-        <div><dt>Cartão</dt><dd>Final 1234</dd></div>
-      </dl>
       <motion.section className="ui-cartao b1-quem" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={MOLA}>
         <div className="b1-quem__cabeca">
           <div>
@@ -621,6 +615,12 @@ function Compra({ aoVoltar, aoContestar, aoReconhecer }) {
           <ul><li><Icone nome="link" tamanho={14} /> XQZ Serviços Digitais · Cidade A</li><li><Icone nome="link" tamanho={14} /> XQ7 Soluções · Cidade B</li></ul>
         </details>
       </motion.section>
+      <dl className="ui-cartao ui-dados b2-detalhe__dados">
+        <div><dt>Nome na fatura</dt><dd><code>INT*XQZ7 SERVICOS</code></dd></div>
+        <div><dt>Data</dt><dd>20 nov, 14:32</dd></div>
+        <div><dt>Banco</dt><dd>{BANCO}</dd></div>
+        <div><dt>Cartão</dt><dd>Final 1234</dd></div>
+      </dl>
       <div className="ui-acoes-fixas">
         <Toque className="ui-botao ui-botao--principal" onClick={aoContestar}>Não reconheço, quero contestar</Toque>
         <Toque className="ui-botao ui-botao--fantasma" onClick={aoReconhecer}>Reconheço, fui eu</Toque>
@@ -667,8 +667,18 @@ Não reconheço esta compra e não autorizei este pagamento. Peço que seja anal
         </button>
       </div>
       <div className="ui-acoes-fixas">
-        <Toque className="ui-botao ui-botao--principal" onClick={aoEnviei}>Já enviei ao banco</Toque>
-        <Toque className="ui-botao ui-botao--fantasma">Abrir app do {BANCO}</Toque>
+        {/* A ordem dos botões segue os passos: primeiro copiar e abrir o banco, depois "Já enviei" */}
+        {copiado ? (
+          <>
+            <Toque className="ui-botao ui-botao--principal" onClick={aoEnviei}>Já enviei ao banco</Toque>
+            <Toque className="ui-botao ui-botao--fantasma">Abrir o {BANCO} de novo</Toque>
+          </>
+        ) : (
+          <>
+            <Toque className="ui-botao ui-botao--principal" onClick={() => setCopiado(true)}><Icone nome="copiar" tamanho={18} /> Copiar e abrir o {BANCO}</Toque>
+            <Toque className="ui-botao ui-botao--fantasma" onClick={aoEnviei}>Já enviei ao banco</Toque>
+          </>
+        )}
       </div>
     </div>
   );
