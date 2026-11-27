@@ -58,6 +58,7 @@ export default function Cenario1() {
   const ERROS = [
     { id: "api", tela: "detalhe", nome: "Nossa API fora do ar", descricao: "A busca falha. A pessoa pode tentar de novo ou contestar mesmo assim.", acao: comErro("detalhe", "api") },
     { id: "baixa", tela: "detalhe", nome: "Loja sem certeza", descricao: "Duas lojas parecidas, longe do local. Mostramos a dúvida.", acao: comErro("detalhe", "baixa") },
+    { id: "mei", tela: "detalhe", nome: "Loja MEI: dados protegidos", descricao: "A fatura traz o nome do dono. A API esconde sobrenome, CPF, rua e telefone.", acao: comErro("detalhe", "mei") },
     { id: "motivo", tela: "contestar", nome: "Esqueceu o motivo", descricao: "Toque em \"Revisar\" sem escolher o que aconteceu.", acao: comErro("contestar", "motivo") },
     { id: "envio", tela: "contestar", nome: "Falha ao enviar", descricao: "O envio falha na 1ª vez. Nada se perde. Na 2ª tentativa funciona.", acao: comErro("contestar", "envio") },
   ];
@@ -92,8 +93,8 @@ export default function Cenario1() {
               aoContestar={() => { setAviso(null); nav.ir("contestar"); }}
               aoBloqueado={() => setAviso({ texto: "No protótipo, este botão não abre nada." })} />
           )}
-          {nav.atual === "contestar" && <Contestar erro={erro} baixa={erro === "baixa"} aoVoltar={nav.voltar} aoEnviado={() => nav.ir("enviado")} />}
-          {nav.atual === "enviado" && <Enviado aoFim={() => { setContestada(true); nav.trocar("inicio"); nav.ir("cartao"); setErro(null); }} />}
+          {nav.atual === "contestar" && <Contestar erro={erro} baixa={erro === "baixa"} mei={erro === "mei"} aoVoltar={nav.voltar} aoEnviado={() => nav.ir("enviado")} />}
+          {nav.atual === "enviado" && <Enviado mei={erro === "mei"} aoFim={() => { setContestada(true); nav.trocar("inicio"); nav.ir("cartao"); setErro(null); }} />}
         </Telas>
       </div>
     </Moldura>
@@ -312,6 +313,33 @@ function Cartao({ movida, reconhecida, contestada, aoTocar, aoInicio, aoBloquead
 
 const PASSOS = ["Limpando o nome da maquininha", "Procurando o CNPJ na Receita Federal", "Comparando com o local da compra"];
 
+// Caso MEI: a razão social é o nome da dona com o CPF no fim (comum em MEI).
+// A API esconde o sobrenome, o CPF, a rua e o telefone. Tudo inventado.
+const R_MEI = {
+  cru: "PAG*ROSAMARIAPEREIRA",
+  loja: "Doces da Rosa",
+  dona: "Rosa Maria P.",
+  atividade: "Confeitaria · MEI (empresa de uma pessoa só)",
+  bairro: "Jardim Exemplo, Cidade Exemplo",
+  categoria: "Alimentação",
+  porque: "A loja é de uma pessoa só (MEI). Para proteger a dona, mostramos só o primeiro nome, o bairro e a cidade. O endereço na Receita fica no mesmo bairro onde o cartão foi usado.",
+  escondidos: ["Sobrenome completo da dona", "CPF que aparece no nome oficial", "Rua e número (pode ser a casa da dona)", "Telefone"],
+  fontes: ["Receita Federal (dados públicos do CNPJ)", "Perfil da loja numa rede social"],
+};
+const API_RESPOSTA_MEI = {
+  consulta: "c_51d0e7",
+  loja: "Doces da Rosa",
+  dono: "Rosa Maria P.",
+  mei: true,
+  bairro: "Jardim Exemplo",
+  cidade: "Cidade Exemplo",
+  certeza: "alta",
+  categoria: "Alimentação",
+  dados_protegidos: true,
+  campos_ocultos: ["nome_completo", "cpf", "logradouro", "telefone"],
+  fontes: 2,
+};
+
 const R_BAIXA = {
   loja: "Lanchonete Bom Dia",
   porque: "Achamos 2 lojas com nome parecido. A mais perto fica a 3,2 km de onde o cartão foi usado. Por isso não temos certeza.",
@@ -329,10 +357,12 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
   const terminar = useCallback(() => setFase("pronto"), []);
   const falhou = erro === "api";
   const baixa = erro === "baixa";
+  const mei = erro === "mei";
   const pronto = fase === "pronto";
   const achou = pronto && !falhou;
-  const loja = baixa ? R_BAIXA.loja : R.loja;
-  const estabelecimento = achou && !baixa ? R.loja : "MP*PADARIABOMDIA";
+  const loja = baixa ? R_BAIXA.loja : mei ? R_MEI.loja : R.loja;
+  const cru = mei ? R_MEI.cru : "MP*PADARIABOMDIA";
+  const estabelecimento = achou && !baixa ? loja : cru;
 
   return (
     <div className="ui-rolagem c6-tela c6-recibo-tela">
@@ -342,7 +372,7 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
         </button>
 
         <div className="c6-recibo__topo">
-          <span className="c6-recibo__icone"><Icone nome={achou && !baixa ? "pao" : "carrinho"} tamanho={24} /></span>
+          <span className="c6-recibo__icone"><Icone nome={achou && !baixa && !mei ? "pao" : "carrinho"} tamanho={24} /></span>
           <h2 className="c6-recibo__nome">{estabelecimento}</h2>
           <p className="c6-recibo__valor">R$ 32,50</p>
           <p className="c6-recibo__data">24 NOV 2026 08:12</p>
@@ -395,13 +425,31 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
                       <div>
                         {baixa && <p className="c6-rotulo-fino">Não temos certeza. O mais provável é</p>}
                         <h3 id="quem-titulo" className="c6-quem__loja">{loja}</h3>
-                        <p className="c6-rotulo-fino">{baixa ? "Lanchonete" : R.atividade}</p>
+                        <p className="c6-rotulo-fino">{baixa ? "Lanchonete" : mei ? R_MEI.atividade : R.atividade}</p>
                       </div>
                       <AnelCerteza nivel={baixa ? "baixa" : "alta"} variante="3d" />
                     </div>
-                    <p className="c6-importante"><span className="c6-importante__i" aria-hidden="true">i</span>{baixa ? R_BAIXA.porque : R.porque}</p>
-                    <MapaFalso distancia={baixa ? R_BAIXA.distancia : R.distancia} longe={baixa} />
-                    {!baixa && (
+                    <p className="c6-importante"><span className="c6-importante__i" aria-hidden="true">i</span>{baixa ? R_BAIXA.porque : mei ? R_MEI.porque : R.porque}</p>
+                    {!mei && <MapaFalso distancia={baixa ? R_BAIXA.distancia : R.distancia} longe={baixa} />}
+                    {mei && (
+                      <>
+                        <div className="c6-caixas">
+                          <C6Caixa rotulo="Dona">{R_MEI.dona}</C6Caixa>
+                          <C6Caixa rotulo="Bairro e cidade">{R_MEI.bairro}</C6Caixa>
+                          <C6Caixa rotulo="Situação na Receita">Ativa</C6Caixa>
+                        </div>
+                        <details className="ui-fontes c6-fontes">
+                          <summary>O que escondemos e por quê</summary>
+                          <ul>
+                            {R_MEI.escondidos.map((f) => (
+                              <li key={f}><Icone nome="cadeado" tamanho={14} /> {f}</li>
+                            ))}
+                          </ul>
+                          <p className="c6-rotulo-fino">Num MEI, esses dados são da pessoa, não da empresa. Pela LGPD, a API manda só o necessário. Eles não saem do nosso servidor.</p>
+                        </details>
+                      </>
+                    )}
+                    {!baixa && !mei && (
                       <div className="c6-caixas">
                         <C6Caixa rotulo="CNPJ">{R.cnpj}</C6Caixa>
                         <C6Caixa rotulo="Endereço">{R.endereco}</C6Caixa>
@@ -409,9 +457,9 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
                       </div>
                     )}
                     <details className="ui-fontes c6-fontes">
-                      <summary>{baixa ? "Ver as 2 lojas parecidas" : `Ver as fontes (${R.fontes.length})`}</summary>
+                      <summary>{baixa ? "Ver as 2 lojas parecidas" : `Ver as fontes (${(mei ? R_MEI : R).fontes.length})`}</summary>
                       <ul>
-                        {(baixa ? ["Lanchonete Bom Dia · a 3,2 km", "Bom Dia Lanches e Café · a 7,8 km"] : R.fontes).map((f) => (
+                        {(baixa ? ["Lanchonete Bom Dia · a 3,2 km", "Bom Dia Lanches e Café · a 7,8 km"] : mei ? R_MEI.fontes : R.fontes).map((f) => (
                           <li key={f}><Icone nome="link" tamanho={14} /> {f}</li>
                         ))}
                       </ul>
@@ -429,7 +477,7 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
             <button type="button" className="c6-pilula" onClick={aoBloqueado}>Alterar</button>
           </div>
           <div>
-            <span><dt>Nome original</dt><dd className="c6-campos__cru">MP*PADARIABOMDIA</dd></span>
+            <span><dt>Nome original</dt><dd className="c6-campos__cru">{cru}</dd></span>
           </div>
           <div>
             <span><dt>Cartão</dt><dd>Crédito ...1234</dd></span>
@@ -447,9 +495,9 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
             <summary><Icone nome="codigo" tamanho={16} /> Ver por trás: o que a API recebe e devolve</summary>
             <div className="b1-tecnico__corpo">
               <p>O banco manda <code>POST /api/identificar</code></p>
-              <pre>{JSON.stringify(API_PEDIDO, null, 2)}</pre>
+              <pre>{JSON.stringify(mei ? { ...API_PEDIDO, nome_fatura: R_MEI.cru } : API_PEDIDO, null, 2)}</pre>
               <p>A nossa API devolve (resumo), em cerca de 13 s</p>
-              <pre>{JSON.stringify(baixa ? { ...API_RESPOSTA, loja: R_BAIXA.loja, certeza: "baixa", distancia_m: 3200 } : API_RESPOSTA, null, 2)}</pre>
+              <pre>{JSON.stringify(baixa ? { ...API_RESPOSTA, loja: R_BAIXA.loja, certeza: "baixa", distancia_m: 3200 } : mei ? API_RESPOSTA_MEI : API_RESPOSTA, null, 2)}</pre>
             </div>
           </details>
         )}
@@ -476,7 +524,7 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
 }
 
 // ---------- Tela 3: contestar com provas ----------
-function Contestar({ erro, baixa, aoVoltar, aoEnviado }) {
+function Contestar({ erro, baixa, mei, aoVoltar, aoEnviado }) {
   const [tipo, setTipo] = useState("");
   const [aviso, setAviso] = useState("");
   const [folha, setFolha] = useState(false);
@@ -498,7 +546,10 @@ function Contestar({ erro, baixa, aoVoltar, aoEnviado }) {
     }, 1100);
   }
 
-  const provas = [
+  const provas = mei ? [
+    ["Loja", R_MEI.loja], ["Dona (MEI)", R_MEI.dona], ["Bairro e cidade", R_MEI.bairro],
+    ["Situação na Receita", "Ativa"], ["Fontes consultadas", `${R_MEI.fontes.length}`],
+  ] : [
     ["Loja", R.loja], ["CNPJ na Receita", R.cnpj], ["Endereço da loja", R.endereco],
     ["Distância do local da compra", R.distancia], ["Fontes consultadas", `${R.fontes.length}`],
   ];
@@ -513,7 +564,7 @@ function Contestar({ erro, baixa, aoVoltar, aoEnviado }) {
       <div className="c6-corpo">
         <span className="c6-corpo__pegador" aria-hidden="true" />
         <div className="c6-margem">
-          <p className="c6-titulo-fino">{R.loja}</p>
+          <p className="c6-titulo-fino">{mei ? R_MEI.loja : R.loja}</p>
           <p className="c6-rotulo-fino">R$ 32,50 · ontem, 08:12</p>
 
           <h3 className="c6-rotulo c6-espaco">O que aconteceu?</h3>
@@ -563,7 +614,7 @@ function Contestar({ erro, baixa, aoVoltar, aoEnviado }) {
       <Folha aberta={folha} aoFechar={() => !enviando && setFolha(false)} titulo="Enviar contestação?" travada={enviando} estilo={coresCss(BANCO_FICTICIO)} classe="c6-modal">
         <h2 className="ui-folha__titulo">Enviar contestação?</h2>
         <div className="c6-caixas">
-          <C6Caixa rotulo="Compra">R$ 32,50 · {R.loja}</C6Caixa>
+          <C6Caixa rotulo="Compra">R$ 32,50 · {mei ? R_MEI.loja : R.loja}</C6Caixa>
           <C6Caixa rotulo="Data">24/11, 08:12</C6Caixa>
           <C6Caixa rotulo="Motivo">{tipo === "golpe" ? "Não fui eu" : "Fui eu, mas teve problema"}</C6Caixa>
           <C6Caixa rotulo="Provas">5 itens anexados</C6Caixa>
@@ -588,7 +639,7 @@ function Contestar({ erro, baixa, aoVoltar, aoEnviado }) {
 }
 
 // ---------- Tela 4: enviado ----------
-function Enviado({ aoFim }) {
+function Enviado({ mei, aoFim }) {
   const [copiado, setCopiado] = useState(false);
   return (
     <div className="ui-rolagem c6-tela">
