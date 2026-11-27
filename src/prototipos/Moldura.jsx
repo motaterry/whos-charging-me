@@ -13,7 +13,7 @@ const MOLA = { type: "spring", stiffness: 420, damping: 38, mass: 0.9 };
 
 export default function Moldura({
   titulo, subtitulo, telas, atual, irPara, aoVoltar, podeVoltar, aoRecomecar,
-  nota, erros = [], erroAtual, claro = true, children,
+  nota, erros = [], erroAtual, claro = true, aviso, children,
 }) {
   const indice = Math.max(0, telas.findIndex((t) => t.id === atual));
   const tela = telas[indice];
@@ -57,6 +57,7 @@ export default function Moldura({
             </AnimatePresence>
           </button>
           <span className="proto__faixa-direita">
+            {aviso && <span className="proto__aviso-conceito">{aviso}</span>}
             <button type="button" className="proto__faixa-botao" onClick={aoRecomecar} disabled={!podeVoltar && !erroAtual} aria-label="Recomeçar do início">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 109-9 9.5 9.5 0 00-6.7 2.7L3 8 M3 3v5h5" /></svg>
               <span className="proto__faixa-texto">Recomeçar</span>
@@ -95,6 +96,7 @@ export default function Moldura({
 
                 <div className="proto-guia__corpo">
                   {subtitulo && <p className="proto-guia__sub">{subtitulo}</p>}
+                  {aviso && <p className="proto-guia__sub"><strong>{aviso}</strong></p>}
                   <div className="proto__botoes">
                     <button type="button" className="proto__botao" disabled={!podeVoltar} onClick={escolher(aoVoltar)}>Voltar uma tela</button>
                     <button type="button" className="proto__botao" disabled={!podeVoltar && !erroAtual} onClick={escolher(aoRecomecar)}>Recomeçar</button>

@@ -4,20 +4,13 @@ export default function Inicio() {
     <main className="pagina">
       <a className="botao botao--link" href="#/">← Voltar ao site</a>
       <h1>Protótipos</h1>
-      <p className="subtitulo">Como o "Quem me cobrou?" pode chegar às pessoas. São telas clicáveis, com dados de exemplo.</p>
+      <p className="subtitulo">Como o "Quem me cobrou?" chega às pessoas: dentro do app do banco. São telas clicáveis, com dados de exemplo. Conceito, sem vínculo com o banco.</p>
       <ul className="proto-escolha">
         <li>
           <a className="proto-escolha__item" href="#/prototipos/cenario-1">
-            <span className="proto-escolha__tag">Cenário 1 · para bancos</span>
+            <span className="proto-escolha__tag">Para bancos (B2B) · estilo C6</span>
             <strong>Dentro do app do banco</strong>
-            <span>O banco manda o nome e o local da compra. A pessoa só toca na compra e vê a loja. Pode contestar com as provas já preenchidas.</span>
-          </a>
-        </li>
-        <li>
-          <a className="proto-escolha__item" href="#/prototipos/cenario-2">
-            <span className="proto-escolha__tag">Cenário 2 · visão de futuro</span>
-            <strong>O nosso app</strong>
-            <span>A pessoa cria conta, conecta os bancos pelo Open Finance e o app acha sozinho as compras de nome estranho.</span>
+            <span>A jornada começa na tela inicial do banco. A pessoa toca em "Não reconhece uma compra?", escolhe a compra e vê a loja. Pode contestar com as provas já preenchidas.</span>
           </a>
         </li>
       </ul>
