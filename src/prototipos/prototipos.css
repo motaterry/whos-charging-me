@@ -39,6 +39,17 @@
 .proto__nota { margin-top: var(--espaco-5); padding: var(--espaco-4); background: var(--cor-superficie); border-radius: var(--raio-g); }
 .proto__nota h2 { font-size: var(--texto-corpo); margin: 0 0 var(--espaco-1); }
 .proto__nota p { margin: 0; color: var(--cor-texto-suave); }
+.proto__erros { margin-top: var(--espaco-5); }
+.proto__erros h2 { font-size: var(--texto-corpo); margin: 0; }
+.proto__erros p { margin: 2px 0 var(--espaco-2); }
+.proto__erros ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--espaco-2); }
+.proto__erro {
+  width: 100%; display: grid; gap: 2px; text-align: left; padding: var(--espaco-3) var(--espaco-4); cursor: pointer;
+  background: var(--cor-superficie); border: 2px solid transparent; border-radius: var(--raio-m); font: inherit; color: var(--cor-texto);
+}
+.proto__erro span { color: var(--cor-texto-suave); font-size: var(--texto-legenda); }
+.proto__erro:hover { border-color: var(--cor-erro); }
+.proto__erro--ativo { border-color: var(--cor-erro); background: var(--cor-erro-fundo); }
 .proto__lista { margin-top: var(--espaco-4); }
 .proto__lista summary { cursor: pointer; color: var(--cor-destaque); }
 .proto__lista ol { padding-left: 22px; }
@@ -54,7 +65,7 @@
 }
 
 /* Partes comuns dos 2 apps */
-.app-banco { --cor-destaque: #0b6e6e; --cor-destaque-foco: #0a8a8a; min-height: 100%; }
+.app-banco { min-height: 100%; } /* cores vêm de marca.js */
 .app-nosso { min-height: 100%; }
 .app-barra {
   position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: var(--espaco-3);
@@ -206,3 +217,17 @@
 .app-mais ul { margin: var(--espaco-2) 0 0; padding-left: 20px; display: grid; gap: var(--espaco-1); }
 .app-lembrete { margin-top: var(--espaco-4); }
 .app-nosso .texto-pronto { margin-top: var(--espaco-2); }
+
+/* Caso de erro dentro do cartão */
+.app-erro p { margin: 0 0 var(--espaco-2); }
+.app-erro .app-botao { margin-top: var(--espaco-2); }
+.app-folha .aviso { margin: var(--espaco-3) 0 0; }
+.campo--erro input { border-color: var(--cor-erro); }
+.ajuda--erro { color: var(--cor-erro) !important; font-weight: 600; }
+.app-centro--baixo { padding-top: var(--espaco-6); }
+.app-fim__icone--alerta { background: var(--cor-erro-fundo); color: var(--cor-erro); }
+.app-aviso-banco { margin: 0 0 var(--espaco-3); align-items: flex-start; font-size: var(--texto-legenda); }
+.app-aviso-banco .botao--link { display: block; margin-top: var(--espaco-1); padding: 0; color: var(--cor-erro); font-weight: 600; text-decoration: underline; }
+.app-vazio { display: grid; gap: 2px; text-align: center; padding: var(--espaco-4); background: var(--cor-superficie); border-radius: var(--raio-g); margin-bottom: var(--espaco-3); }
+.app-vazio .app-fim__icone { margin: 0 auto var(--espaco-2); width: 48px; height: 48px; font-size: 24px; }
+.app-vazio span { color: var(--cor-texto-suave); font-size: var(--texto-legenda); }

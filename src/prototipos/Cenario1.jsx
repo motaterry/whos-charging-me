@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Moldura from "./Moldura.jsx";
 import MapaFalso from "./MapaFalso.jsx";
 import SeloCerteza from "../componentes/SeloCerteza.jsx";
+import { BANCO_FICTICIO, coresCss } from "./marca.js";
 import { BANCO, COMPRAS_FATURA, RESPOSTA_PADARIA as R, API_PEDIDO, API_RESPOSTA } from "./dados.js";
 
 const TELAS = [
@@ -26,20 +27,28 @@ export default function Cenario1() {
   const [movida, setMovida] = useState(false);
   const [reconhecida, setReconhecida] = useState(false);
   const [contestada, setContestada] = useState(false);
-  const irPara = (t) => { setTela(t); if (t === "fatura") { setMovida(false); setReconhecida(false); setContestada(false); } };
+  const [erro, setErro] = useState(null); // caso de erro escolhido no painel ao lado
+  const irPara = (t) => { setTela(t); setErro(null); if (t === "fatura") { setMovida(false); setReconhecida(false); setContestada(false); } };
+  const ERROS = [
+    { id: "api", nome: "Nossa API fora do ar", descricao: "A busca falha. A pessoa pode tentar de novo ou contestar mesmo assim.", acao: () => { setTela("detalhe"); setErro("api"); } },
+    { id: "baixa", nome: "Loja sem certeza", descricao: "Duas lojas parecidas, longe do local. Mostramos a dúvida.", acao: () => { setTela("detalhe"); setErro("baixa"); } },
+    { id: "motivo", nome: "Esqueceu o motivo", descricao: "Toque em \"Revisar e enviar\" sem escolher o que aconteceu.", acao: () => { setTela("contestar"); setErro("motivo"); } },
+    { id: "envio", nome: "Falha ao enviar", descricao: "O envio falha na 1ª vez. Nada se perde. Na 2ª tentativa funciona.", acao: () => { setTela("contestar"); setErro("envio"); } },
+  ];
   return (
-    <Moldura titulo="Cenário 1: dentro do app do banco" telas={TELAS} atual={tela} irPara={irPara} nota={NOTAS[tela]}>
-      <div className="app-banco">
+    <Moldura titulo="Cenário 1: dentro do app do banco" telas={TELAS} atual={tela} irPara={irPara} nota={NOTAS[tela]} erros={ERROS} erroAtual={erro}>
+      <div className="app-banco" style={coresCss(BANCO_FICTICIO)}>
         {tela === "fatura" && <Fatura movida={movida} reconhecida={reconhecida} contestada={contestada} aoTocar={() => setTela("detalhe")} />}
         {tela === "detalhe" && (
           <Detalhe
+            key={erro || "ok"} erro={erro} aoTentarDeNovo={() => setErro("recarregar")}
             movida={movida} setMovida={setMovida}
             aoVoltar={() => setTela("fatura")}
             aoReconhecer={() => { setReconhecida(true); setTela("fatura"); }}
             aoContestar={() => setTela("contestar")}
           />
         )}
-        {tela === "contestar" && <Contestar aoVoltar={() => setTela("detalhe")} aoEnviar={() => setTela("enviado")} />}
+        {tela === "contestar" && <Contestar key={erro || "ok"} erro={erro} aoVoltar={() => setTela("detalhe")} aoEnviar={() => setTela("enviado")} />}
         {tela === "enviado" && <Enviado aoFim={() => { setContestada(true); setTela("fatura"); }} />}
       </div>
     </Moldura>
@@ -52,7 +61,7 @@ function BarraApp({ titulo, aoVoltar }) {
       {aoVoltar ? (
         <button type="button" className="app-barra__voltar" onClick={aoVoltar} aria-label="Voltar">‹</button>
       ) : (
-        <span className="app-barra__logo" aria-hidden="true">BE</span>
+        <span className="app-barra__logo" aria-hidden="true">{BANCO_FICTICIO.sigla}</span>
       )}
       <span className="app-barra__titulo">{titulo}</span>
     </div>
@@ -105,7 +114,16 @@ function Fatura({ movida, reconhecida, contestada, aoTocar }) {
   );
 }
 
-function Detalhe({ movida, setMovida, aoVoltar, aoReconhecer, aoContestar }) {
+// Resposta quando não temos certeza (caso de erro "baixa").
+const R_BAIXA = {
+  loja: "Talvez: Lanchonete Bom Dia",
+  porque: "Achamos 2 lojas com nome parecido. A mais perto fica a 3,2 km de onde o cartão foi usado. Por isso não temos certeza.",
+  distancia: "3,2 km",
+};
+
+function Detalhe({ erro, aoTentarDeNovo, movida, setMovida, aoVoltar, aoReconhecer, aoContestar }) {
+  const falhou = erro === "api";
+  const baixa = erro === "baixa";
   const [carregando, setCarregando] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setCarregando(false), 1400);
@@ -128,6 +146,25 @@ function Detalhe({ movida, setMovida, aoVoltar, aoReconhecer, aoContestar }) {
               <span className="girando" aria-hidden="true" />
               <span>Procurando a loja na Receita e perto de onde o cartão foi usado...</span>
             </div>
+          ) : falhou ? (
+            <div className="app-erro" role="alert">
+              <h2 id="quem-cobrou" className="app-cartao__loja">Não conseguimos descobrir a loja agora</h2>
+              <p>O serviço que procura a loja não respondeu. A compra continua na sua fatura e nada mudou.</p>
+              <p className="ajuda-texto">Você pode tentar de novo em alguns segundos, ou contestar mesmo assim.</p>
+              <button type="button" className="app-botao app-botao--principal app-botao-largo" onClick={aoTentarDeNovo}>Tentar de novo</button>
+            </div>
+          ) : baixa ? (
+            <>
+              <p className="rotulo">Não temos certeza. O mais provável é</p>
+              <h2 id="quem-cobrou" className="app-cartao__loja">{R_BAIXA.loja}</h2>
+              <SeloCerteza nivel="baixa" />
+              <p className="app-cartao__porque">{R_BAIXA.porque}</p>
+              <MapaFalso distancia={R_BAIXA.distancia} />
+              <details className="fontes">
+                <summary>Ver as 2 lojas parecidas</summary>
+                <ul><li>Lanchonete Bom Dia (a 3,2 km)</li><li>Bom Dia Lanches e Café (a 7,8 km)</li></ul>
+              </details>
+            </>
           ) : (
             <>
               <h2 id="quem-cobrou" className="app-cartao__loja">{R.loja}</h2>
@@ -149,6 +186,7 @@ function Detalhe({ movida, setMovida, aoVoltar, aoReconhecer, aoContestar }) {
 
         {!carregando && (
           <>
+            {!falhou && !baixa && (
             <section className="app-cartao" aria-labelledby="cat-titulo">
               <h3 id="cat-titulo" className="app-cartao__subtitulo">Categoria</h3>
               {movida ? (
@@ -165,7 +203,12 @@ function Detalhe({ movida, setMovida, aoVoltar, aoReconhecer, aoContestar }) {
                 </>
               )}
             </section>
+            )}
+            {baixa && (
+              <p className="ajuda-texto app-cartao">Sem certeza, não sugerimos categoria. A compra fica em "Outros" até você confirmar.</p>
+            )}
 
+            {!falhou && (
             <details className="app-tecnico">
               <summary>Ver o que a API recebe e devolve</summary>
               <p className="ajuda-texto">O banco manda:</p>
@@ -173,6 +216,7 @@ function Detalhe({ movida, setMovida, aoVoltar, aoReconhecer, aoContestar }) {
               <p className="ajuda-texto">A nossa API devolve (resumo):</p>
               <pre>{JSON.stringify(API_RESPOSTA, null, 2)}</pre>
             </details>
+            )}
 
             <div className="app-acoes">
               <button type="button" className="app-botao app-botao--principal" onClick={aoReconhecer}>Reconheço esta compra</button>
@@ -185,10 +229,23 @@ function Detalhe({ movida, setMovida, aoVoltar, aoReconhecer, aoContestar }) {
   );
 }
 
-function Contestar({ aoVoltar, aoEnviar }) {
+function Contestar({ erro, aoVoltar, aoEnviar }) {
   const [tipo, setTipo] = useState("");
   const [confirmar, setConfirmar] = useState(false);
   const [aviso, setAviso] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [falhouEnvio, setFalhouEnvio] = useState(false);
+  const [tentativas, setTentativas] = useState(0);
+  function enviar() {
+    setEnviando(true);
+    setFalhouEnvio(false);
+    setTimeout(() => {
+      setEnviando(false);
+      // No caso de erro "envio", a 1ª tentativa falha e a 2ª funciona.
+      if (erro === "envio" && tentativas === 0) { setTentativas(1); setFalhouEnvio(true); return; }
+      aoEnviar();
+    }, 1000);
+  }
   function revisar() {
     if (!tipo) { setAviso("Escolha o que aconteceu para continuar."); return; }
     setAviso("");
@@ -246,9 +303,17 @@ function Contestar({ aoVoltar, aoEnviar }) {
             <p className="ajuda-texto">
               {tipo === "golpe" ? "Motivo: não fui eu. O cartão final 1234 será bloqueado." : "Motivo: fui eu, mas teve problema."}
             </p>
+            {falhouEnvio && (
+              <p className="aviso aviso--erro" role="alert">
+                <span className="aviso__icone">!</span>
+                Não conseguimos enviar agora. Suas respostas e as provas estão guardadas. Tente de novo.
+              </p>
+            )}
             <div className="app-acoes">
-              <button type="button" className="app-botao app-botao--principal" onClick={aoEnviar}>Sim, enviar</button>
-              <button type="button" className="app-botao" onClick={() => setConfirmar(false)}>Voltar e mudar</button>
+              <button type="button" className="app-botao app-botao--principal" disabled={enviando} onClick={enviar}>
+                {enviando ? "Enviando..." : falhouEnvio ? "Tentar de novo" : "Sim, enviar"}
+              </button>
+              <button type="button" className="app-botao" disabled={enviando} onClick={() => setConfirmar(false)}>Voltar e mudar</button>
             </div>
           </div>
         </div>

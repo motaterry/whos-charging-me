@@ -4,7 +4,8 @@
 import { useEffect, useState } from "react";
 import Moldura from "./Moldura.jsx";
 import SeloCerteza from "../componentes/SeloCerteza.jsx";
-import { COMPRAS_PAINEL, GASTOS, BANCOS_FICTICIOS } from "./dados.js";
+import { BANCO, COMPRAS_PAINEL, GASTOS, BANCOS_FICTICIOS } from "./dados.js";
+import { MARCA, coresCss } from "./marca.js";
 
 const TELAS = [
   { id: "boas-vindas", nome: "Boas-vindas" },
@@ -33,17 +34,25 @@ const NOTAS = {
 export default function Cenario2() {
   const [tela, setTela] = useState("boas-vindas");
   const [escolhas, setEscolhas] = useState({});
-  const [bancos, setBancos] = useState(["Banco Exemplo", "Banco Horizonte"]);
-  const irPara = (t) => { setTela(t); if (t === "boas-vindas") setEscolhas({}); };
+  const [bancos, setBancos] = useState([BANCO, "Banco Horizonte"]);
+  const [erro, setErro] = useState(null); // caso de erro escolhido no painel ao lado
+  const irPara = (t) => { setTela(t); setErro(null); if (t === "boas-vindas") setEscolhas({}); };
+  const comErro = (t, e) => () => { setTela(t); setErro(e); if (!escolhas.objetivo) setEscolhas({ objetivo: "Os dois", aviso: "Sim, me avise" }); };
+  const ERROS = [
+    { id: "cadastro", nome: "E-mail ou senha errados", descricao: "Toque em Continuar. O app explica o que corrigir.", acao: comErro("conta", "cadastro") },
+    { id: "recusou", nome: "Não autorizou no banco", descricao: "A pessoa cancela no app do banco. Oferecemos tentar de novo.", acao: comErro("permissao", "recusou") },
+    { id: "banco-fora", nome: "Um banco não respondeu", descricao: "Mostramos o que veio dos outros bancos e avisamos.", acao: comErro("painel", "banco-fora") },
+    { id: "vazio", nome: "Nenhuma compra estranha", descricao: "Painel sem nada para conferir.", acao: comErro("painel", "vazio") },
+  ];
   return (
-    <Moldura titulo="Cenário 2: o nosso app (visão de futuro)" telas={TELAS} atual={tela} irPara={irPara} nota={NOTAS[tela]}>
-      <div className="app-nosso">
+    <Moldura titulo="Cenário 2: o nosso app (visão de futuro)" telas={TELAS} atual={tela} irPara={irPara} nota={NOTAS[tela]} erros={ERROS} erroAtual={erro}>
+      <div className="app-nosso" style={coresCss(MARCA)}>
         {tela === "boas-vindas" && <BoasVindas aoComecar={() => setTela("conta")} />}
-        {tela === "conta" && <Conta aoVoltar={() => setTela("boas-vindas")} aoContinuar={() => setTela("chat")} />}
+        {tela === "conta" && <Conta key={erro || "ok"} erro={erro} aoVoltar={() => setTela("boas-vindas")} aoContinuar={() => setTela("chat")} />}
         {tela === "chat" && <Chat escolhas={escolhas} setEscolhas={setEscolhas} aoContinuar={() => setTela("bancos")} />}
         {tela === "bancos" && <Bancos bancos={bancos} setBancos={setBancos} aoVoltar={() => setTela("chat")} aoContinuar={() => setTela("permissao")} />}
-        {tela === "permissao" && <Permissao bancos={bancos} aoVoltar={() => setTela("bancos")} aoAutorizar={() => setTela("painel")} />}
-        {tela === "painel" && <Painel escolhas={escolhas} aoAbrir={() => setTela("compra")} />}
+        {tela === "permissao" && <Permissao key={erro || "ok"} erro={erro} bancos={bancos} aoVoltar={() => setTela("bancos")} aoAutorizar={() => { setErro(null); setTela("painel"); }} />}
+        {tela === "painel" && <Painel erro={erro} aoTentarDeNovo={() => setErro(null)} escolhas={escolhas} aoAbrir={() => setTela("compra")} />}
         {tela === "compra" && <Compra aoVoltar={() => setTela("painel")} aoContestar={() => setTela("contestar")} />}
         {tela === "contestar" && <Contestar aoVoltar={() => setTela("compra")} aoEnviei={() => setTela("acompanhar")} />}
         {tela === "acompanhar" && <Acompanhar aoPainel={() => setTela("painel")} />}
@@ -64,9 +73,9 @@ function Barra({ titulo, aoVoltar }) {
 function BoasVindas({ aoComecar }) {
   return (
     <div className="app-conteudo app-centro">
-      <div className="app-logo" aria-hidden="true">?</div>
-      <h2 className="app-grande">Quem me cobrou?</h2>
-      <p>Ache as compras de nome estranho em todos os seus cartões. Num lugar só.</p>
+      <div className="app-logo" aria-hidden="true">{MARCA.letraLogo}</div>
+      <h2 className="app-grande">{MARCA.nome}</h2>
+      <p>{MARCA.frase}</p>
       <ul className="app-provas app-provas--esquerda">
         <li>✓ Mostramos qual é a loja e de onde veio a informação</li>
         <li>✓ Avisamos quando aparece um nome estranho</li>
@@ -80,7 +89,17 @@ function BoasVindas({ aoComecar }) {
   );
 }
 
-function Conta({ aoVoltar, aoContinuar }) {
+function Conta({ erro, aoVoltar, aoContinuar }) {
+  // No caso de erro "cadastro", os campos já vêm com e-mail e senha errados.
+  const [email, setEmail] = useState(erro === "cadastro" ? "ana@exemplo" : "ana@exemplo.com");
+  const [senha, setSenha] = useState(erro === "cadastro" ? "123" : "exemplo123");
+  const [tentou, setTentou] = useState(false);
+  const erroEmail = !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ? "Confira o e-mail. Exemplo: nome@email.com" : "";
+  const erroSenha = senha.length < 8 ? `A senha precisa ter pelo menos 8 letras ou números. Faltam ${8 - senha.length}.` : "";
+  function continuar() {
+    setTentou(true);
+    if (!erroEmail && !erroSenha) aoContinuar();
+  }
   return (
     <>
       <Barra titulo="Criar conta" aoVoltar={aoVoltar} />
@@ -89,18 +108,23 @@ function Conta({ aoVoltar, aoContinuar }) {
           <label htmlFor="c2-nome">Seu nome</label>
           <input id="c2-nome" defaultValue="Ana" autoComplete="off" />
         </div>
-        <div className="campo">
+        <div className={`campo${tentou && erroEmail ? " campo--erro" : ""}`}>
           <label htmlFor="c2-email">E-mail</label>
-          <input id="c2-email" type="email" defaultValue="ana@exemplo.com" autoComplete="off" />
+          <input id="c2-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off"
+            aria-invalid={tentou && !!erroEmail} aria-describedby="c2-email-ajuda" />
+          {tentou && erroEmail && <p id="c2-email-ajuda" className="ajuda ajuda--erro">{erroEmail}</p>}
         </div>
-        <div className="campo">
+        <div className={`campo${tentou && erroSenha ? " campo--erro" : ""}`}>
           <label htmlFor="c2-senha">Senha</label>
-          <input id="c2-senha" type="password" defaultValue="exemplo123" autoComplete="off" aria-describedby="c2-senha-ajuda" />
-          <p id="c2-senha-ajuda" className="ajuda">Pelo menos 8 letras ou números.</p>
+          <input id="c2-senha" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} autoComplete="off"
+            aria-invalid={tentou && !!erroSenha} aria-describedby="c2-senha-ajuda" />
+          <p id="c2-senha-ajuda" className={`ajuda${tentou && erroSenha ? " ajuda--erro" : ""}`}>
+            {tentou && erroSenha ? erroSenha : "Pelo menos 8 letras ou números."}
+          </p>
         </div>
         <p className="app-dica">Protótipo: nada é salvo.</p>
         <div className="app-acoes">
-          <button type="button" className="app-botao app-botao--principal" onClick={aoContinuar}>Continuar</button>
+          <button type="button" className="app-botao app-botao--principal" onClick={continuar}>Continuar</button>
         </div>
       </div>
     </>
@@ -184,13 +208,39 @@ function Bancos({ bancos, setBancos, aoVoltar, aoContinuar }) {
   );
 }
 
-function Permissao({ bancos, aoVoltar, aoAutorizar }) {
+function Permissao({ erro, bancos, aoVoltar, aoAutorizar }) {
   const [conectando, setConectando] = useState(false);
+  const [recusou, setRecusou] = useState(false);
+  const [tentativas, setTentativas] = useState(0);
   useEffect(() => {
     if (!conectando) return;
-    const t = setTimeout(aoAutorizar, 1600);
+    const t = setTimeout(() => {
+      setConectando(false);
+      // No caso de erro "recusou", a 1ª tentativa volta sem autorização.
+      if (erro === "recusou" && tentativas === 0) { setTentativas(1); setRecusou(true); return; }
+      aoAutorizar();
+    }, 1600);
     return () => clearTimeout(t);
-  }, [conectando, aoAutorizar]);
+  }, [conectando]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (recusou) {
+    return (
+      <>
+        <Barra titulo="Sua permissão" aoVoltar={aoVoltar} />
+        <div className="app-conteudo app-centro app-centro--baixo">
+          <div className="app-fim__icone app-fim__icone--alerta" aria-hidden="true">!</div>
+          <h2 className="app-cartao__loja" role="alert">O {bancos[0]} não foi conectado</h2>
+          <p>A autorização foi cancelada no app do banco. Sem ela, não conseguimos ver suas faturas.</p>
+          <p className="ajuda-texto">Se foi sem querer, tente de novo. Você também pode seguir sem esse banco.</p>
+          <div className="app-acoes">
+            <button type="button" className="app-botao app-botao--principal" onClick={() => { setRecusou(false); setConectando(true); }}>Tentar de novo</button>
+            <button type="button" className="app-botao" onClick={aoVoltar}>Escolher outros bancos</button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <Barra titulo="Sua permissão" aoVoltar={conectando ? undefined : aoVoltar} />
@@ -216,22 +266,46 @@ function Permissao({ bancos, aoVoltar, aoAutorizar }) {
   );
 }
 
-function Painel({ escolhas, aoAbrir }) {
+function Painel({ erro, aoTentarDeNovo, escolhas, aoAbrir }) {
   const total = GASTOS.reduce((s, g) => s + g.valor, 0);
+  const bancoFora = erro === "banco-fora";
+  const vazio = erro === "vazio";
+  // Banco fora do ar: escondemos as compras desse banco e avisamos.
+  const compras = bancoFora ? COMPRAS_PAINEL.filter((c) => c.banco !== "Banco Horizonte") : vazio ? [] : COMPRAS_PAINEL;
   const mostrarGastos = escolhas.objetivo !== "Achar compras estranhas";
   const mostrarCompras = escolhas.objetivo !== "Controlar meus gastos";
   return (
     <>
       <Barra titulo="Olá, Ana" />
       <div className="app-conteudo">
+        {bancoFora && (
+          <div className="aviso aviso--erro app-aviso-banco" role="alert">
+            <span className="aviso__icone">!</span>
+            <span>
+              O <strong>Banco Horizonte</strong> não respondeu. Mostramos só o que veio dos outros bancos. Tentamos de novo sozinhos daqui a 1 hora.
+              <button type="button" className="botao botao--link" onClick={aoTentarDeNovo}>Tentar agora</button>
+            </span>
+          </div>
+        )}
         {mostrarCompras && (
           <section aria-labelledby="estranhas">
-            <div className="app-alerta">
-              <strong id="estranhas">3 compras com nome estranho</strong>
-              <span>Já identificamos 2. Uma precisa da sua atenção.</span>
-            </div>
+            {compras.length === 0 ? (
+              <div className="app-vazio">
+                <div className="app-fim__icone" aria-hidden="true">✓</div>
+                <strong id="estranhas">Nenhuma compra com nome estranho</strong>
+                <span>Conferimos suas faturas de novembro. Avisamos se aparecer alguma.</span>
+              </div>
+            ) : (
+              <div className="app-alerta">
+                <strong id="estranhas">{compras.length} {compras.length === 1 ? "compra" : "compras"} com nome estranho</strong>
+                <span>
+                  Já identificamos {compras.filter((c) => c.loja).length}.
+                  {compras.some((c) => !c.loja) ? " Uma precisa da sua atenção." : ""}
+                </span>
+              </div>
+            )}
             <ul className="app-lista">
-              {COMPRAS_PAINEL.map((c) => {
+              {compras.map((c) => {
                 const Conteudo = (
                   <>
                     <span className="app-lista__nome">{c.loja || "Não sabemos com certeza"}</span>
@@ -293,7 +367,7 @@ function Compra({ aoVoltar, aoContestar }) {
         <div className="app-compra">
           <p className="app-compra__valor">R$ 89,90</p>
           <p className="app-compra__nome">INT*XQZ7 SERVICOS</p>
-          <p className="app-compra__info">20/11 · Banco Exemplo · cartão final 1234</p>
+          <p className="app-compra__info">20/11 · {BANCO} · cartão final 1234</p>
         </div>
         <section className="app-cartao">
           <p className="rotulo">Não temos certeza. O mais provável é</p>
@@ -331,12 +405,12 @@ Data: 20/11/2026
 Não reconheço esta compra e não autorizei este pagamento. Peço que seja analisada e o valor devolvido. Por favor, me informem o número de protocolo.`;
   return (
     <>
-      <Barra titulo="Contestar no Banco Exemplo" aoVoltar={aoVoltar} />
+      <Barra titulo={`Contestar no ${BANCO}`} aoVoltar={aoVoltar} />
       <div className="app-conteudo">
         <h3 className="app-cartao__subtitulo">Como fazer (3 passos)</h3>
         <ol className="lista">
           <li><span className="lista__numero" aria-hidden="true">1</span><span>Copie o texto abaixo.</span></li>
-          <li><span className="lista__numero" aria-hidden="true">2</span><span>Abra o app do Banco Exemplo e vá em "Contestar compra".</span></li>
+          <li><span className="lista__numero" aria-hidden="true">2</span><span>Abra o app do {BANCO} e vá em "Contestar compra".</span></li>
           <li><span className="lista__numero" aria-hidden="true">3</span><span>Cole o texto e anote o protocolo.</span></li>
         </ol>
         <pre className="texto-pronto">{texto}</pre>
