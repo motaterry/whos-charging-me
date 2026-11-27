@@ -74,4 +74,4 @@ O código usa a licença [PolyForm Noncommercial 1.0.0](LICENSE).
 
 ## Time
 
-Terry, Aline e Rafael.
+Terry e Aline.
