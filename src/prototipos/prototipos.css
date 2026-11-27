@@ -17,16 +17,21 @@
 /* ===== Moldura (página do protótipo) ===== */
 .proto {
   --ui-verde: #30a14e; --ui-ambar: #c77700; --ui-vermelho: #e5302a; --ui-linha: #e8e8ed;
-  max-width: 1040px; margin: 0 auto; padding: var(--espaco-5) var(--espaco-4) var(--espaco-7);
+  max-width: 1040px; margin: 0 auto; padding: 52px var(--espaco-4) var(--espaco-7);
 }
-.proto__voltar-lista { font-size: var(--texto-legenda); color: var(--cor-destaque); text-decoration: none; }
-.proto__voltar-lista:hover { text-decoration: underline; }
-.proto__titulo { font-size: 32px; letter-spacing: -0.6px; margin: var(--espaco-2) 0 var(--espaco-1); }
-.proto__subtitulo { margin: 0 0 var(--espaco-3); color: var(--cor-texto-suave); }
-.proto__faixa {
-  display: inline-block; margin: 0 0 var(--espaco-5); padding: 6px 12px; border-radius: var(--raio-pilula);
-  background: #fff4d6; color: #6b4600; font-size: 13px; font-weight: 600;
+/* Faixa preta fina no topo da página */
+.proto__faixa-topo {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 32px; padding: 0 12px;
+  display: flex; align-items: center; justify-content: space-between; background: #000; color: #fff;
 }
+.proto__sair {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px;
+  background: rgba(255,255,255,.14); color: #fff; font-size: 12px; font-weight: 600; text-decoration: none; line-height: 1.4;
+}
+.proto__sair:hover { background: rgba(255,255,255,.24); }
+.proto__sair:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.proto__cenario { margin: 0 0 2px; font-size: 13px; font-weight: 600; color: var(--cor-destaque); }
+.proto__cenario-sub { margin: 0 0 var(--espaco-4); font-size: 13px; color: var(--cor-texto-suave); line-height: 1.4; }
 .proto__corpo { display: grid; grid-template-columns: auto 1fr; gap: 56px; align-items: start; }
 .proto__palco {
   padding: 28px; border-radius: 48px;
@@ -488,10 +493,9 @@
   .proto__erros ul { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
-  .proto { padding: 12px 0 40px; }
-  .proto__topo, .proto__lado { padding-left: 16px; padding-right: 16px; }
-  .proto__titulo { font-size: 26px; }
-  .ui-iphone { width: 100vw; height: min(820px, calc(100svh - 24px)); padding: 0; border-radius: 0; box-shadow: none; background: none; }
+  .proto { padding: 32px 0 40px; }
+  .proto__lado { padding-left: 16px; padding-right: 16px; }
+  .ui-iphone { width: 100vw; height: calc(100svh - 32px); padding: 0; border-radius: 0; box-shadow: none; background: none; }
   .ui-iphone__tela { border-radius: 0; }
   .ui-status, .ui-iphone__barra, .ui-tela::after { display: none; }
   .ui-rolagem { padding-top: 12px; }

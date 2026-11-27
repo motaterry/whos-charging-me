@@ -1,5 +1,5 @@
 // Moldura dos protótipos: um celular realista no meio da tela e um painel ao lado com:
-// - faixa dizendo que é protótipo (nada é real);
+// - faixa preta fina com o botão "Sair do protótipo";
 // - "Tela X de Y" e o nome da tela (a pessoa sabe onde está);
 // - Voltar e Recomeçar (a pessoa pode sair de qualquer tela);
 // - "O que mostrar nesta tela", para quem apresenta;
@@ -17,11 +17,12 @@ export default function Moldura({
   return (
     <MotionConfig reducedMotion="user">
       <div className="proto">
-        <header className="proto__topo">
-          <a className="proto__voltar-lista" href="#/prototipos">← Todos os protótipos</a>
-          <h1 className="proto__titulo">{titulo}</h1>
-          {subtitulo && <p className="proto__subtitulo">{subtitulo}</p>}
-          <p className="proto__faixa" role="note">Protótipo: só visual. Os dados são de exemplo. Nada aqui é real.</p>
+        {/* Faixa preta fina no topo: só o botão de sair do protótipo. */}
+        <header className="proto__faixa-topo">
+          <a className="proto__sair" href="#/">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+            Sair do protótipo
+          </a>
         </header>
 
         <div className="proto__corpo">
@@ -30,6 +31,8 @@ export default function Moldura({
           </div>
 
           <aside className="proto__lado">
+            <p className="proto__cenario">{titulo}</p>
+            {subtitulo && <p className="proto__cenario-sub">{subtitulo}</p>}
             <p className="proto__onde">Tela {indice + 1} de {telas.length}</p>
             <AnimatePresence mode="wait" initial={false}>
               <motion.p key={tela.id} className="proto__nome-tela"
