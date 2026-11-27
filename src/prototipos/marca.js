@@ -17,7 +17,7 @@ export const BANCO_FICTICIO = {
   cor: "#ffd100",          // cor de destaque (botão principal, aba ativa). Troque aqui para mudar tudo.
   corFoco: "#ffdd3d",
   corSobre: "#121212",     // cor do texto em cima da cor de destaque
-  corLink: "#5aa9ff",      // cor dos links de texto
+  corLink: "#ffd100",      // cor dos links de texto (igual ao destaque: sem azul)
 };
 
 // Transforma as cores em variáveis de CSS para o "style" do app.

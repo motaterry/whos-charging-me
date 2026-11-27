@@ -603,6 +603,7 @@
 .b1--escuro .ui-dados > div, .b1-folha--escuro .ui-dados > div, .b1--escuro .b1-lista li + li .b1-lista__item, .b1--escuro .b1-provas li + li { border-top-color: var(--bx-linha); }
 .b1--escuro .ui-fontes summary, .b1--escuro .ui-nav__voltar, .b1--escuro .b1-quem__marca { color: var(--cor-link); }
 .b1--escuro .ui-nav__voltar { color: #fff; }
+.b1--escuro .b1-quem__marca { color: var(--cor-destaque); }
 .b1--escuro .ui-fontes li { color: #d1d1d6; }
 .b1--escuro .ui-botao, .b1-folha--escuro .ui-botao { border-radius: 12px; }
 .b1--escuro .ui-botao--principal, .b1-folha--escuro .ui-botao--principal { box-shadow: none; }
@@ -677,3 +678,16 @@
 .b1--escuro .ui-linha-tempo li.feito::after { background: #f5f5f7; }
 .b1--escuro .mapa-falso__ponto--compra { background: #fff; }
 .b1--escuro .mapa-falso__ponto--loja, .b1--escuro .mapa-falso__ponto--longe { background: var(--cor-destaque); }
+/* Anel de certeza "3D de mentira" (cenário 1) */
+.ui-anel3d { display: grid; justify-items: center; gap: var(--ep-2); flex: none; perspective: 400px; transform-style: preserve-3d; }
+.ui-anel3d__roda { position: relative; width: 96px; height: 96px; display: grid; place-items: center; }
+.ui-anel3d__roda svg { position: absolute; inset: 0; filter: drop-shadow(0 6px 10px color-mix(in srgb, var(--cor-destaque) 30%, transparent)); }
+.ui-anel3d__disco { position: absolute; inset: 14px; border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #46464a 0%, #232325 45%, #111112 100%);
+  box-shadow: inset 0 2px 1px rgba(255,255,255,.18), inset 0 -8px 14px rgba(0,0,0,.65), 0 14px 22px -8px rgba(0,0,0,.9); }
+.ui-anel3d__nivel { position: relative; font-size: 20px; font-weight: 800; letter-spacing: -0.4px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,.6); }
+.ui-anel3d__legenda { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--bx-suave, #8e8e93); }
+.b1--escuro .b1-quem { padding: var(--ep-5); }
+.b1--escuro .b1-quem__cabeca { gap: var(--ep-4); align-items: center; }
+.b1--escuro .b1-quem__marca { margin-bottom: var(--ep-4); }
+.b1--escuro .b1-quem__porque { margin-top: var(--ep-4); }

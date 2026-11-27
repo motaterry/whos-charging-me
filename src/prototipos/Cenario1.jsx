@@ -305,7 +305,7 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
                   </motion.h3>
                   <p className="ui-suave">{baixa ? "Lanchonete" : R.atividade}</p>
                 </div>
-                <AnelCerteza nivel={baixa ? "baixa" : "alta"} />
+                <AnelCerteza nivel={baixa ? "baixa" : "alta"} variante="3d" />
               </div>
               <p className="b1-quem__porque">{baixa ? R_BAIXA.porque : R.porque}</p>
               <MapaFalso distancia={baixa ? R_BAIXA.distancia : R.distancia} longe={baixa} escuro />
