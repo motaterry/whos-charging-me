@@ -731,6 +731,9 @@
 .b2-saldo__numero { margin: 0; font-size: 56px; font-weight: 800; letter-spacing: -2px; line-height: 1.05; font-variant-numeric: tabular-nums; }
 .b2-saldo__botao { min-height: 40px; padding: 0 var(--ep-4); font-size: 15px; border-radius: 10px; }
 .b2-saldo__texto { margin: 0; font-size: 14px; color: var(--bx-suave, #6e6e73); }
+.b2-tres.b2-tres--dois { grid-template-columns: repeat(2, 1fr); }
+.b2-saldo__numero { background: none; border: 0; padding: 0; color: inherit; font-family: inherit; text-align: left; cursor: pointer; }
+.b2-saldo__filtro { background: none; border: 0; padding: 4px 0; font: inherit; font-weight: 600; color: var(--cor-link); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .b2-saldo__texto em { font-style: normal; font-weight: 600; color: var(--cor-link); }
 .b2-tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ep-2); margin: var(--ep-4) var(--ep-margem-tela) 0; }
 .b2-tres .ui-botao { min-height: 44px; padding: 0 var(--ep-2); font-size: 15px; border-radius: 10px; }
