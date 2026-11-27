@@ -3,10 +3,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./tokens.css";
 import "./estilo.css";
-import App from "./App.jsx";
+import Raiz from "./Raiz.jsx";
 
 createRoot(document.getElementById("raiz")).render(
   <StrictMode>
-    <App />
+    <Raiz />
   </StrictMode>
 );
