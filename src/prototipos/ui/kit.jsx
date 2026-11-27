@@ -1,6 +1,6 @@
 // Peças de interface dos protótipos, com animação (biblioteca "motion").
 // Quem pediu "menos movimento" no sistema vê tudo sem animação (MotionConfig reducedMotion="user").
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, animate, useMotionValue, useTransform } from "motion/react";
 
@@ -61,7 +61,7 @@ export function Toque({ className = "", children, ...resto }) {
 }
 
 // ---------- Folha que sobe de baixo (bottom sheet). Arraste para baixo para fechar. ----------
-export function Folha({ aberta, aoFechar, titulo, children, travada = false, estilo }) {
+export function Folha({ aberta, aoFechar, titulo, children, travada = false, estilo, classe = "" }) {
   // "estilo" leva as cores da marca (a folha aparece fora da tela do app, então precisa recebê-las).
   const alvo = typeof document !== "undefined" ? document.getElementById("ui-camada") : null;
   // Tecla Esc fecha a folha (quem usa teclado também consegue sair).
@@ -81,7 +81,7 @@ export function Folha({ aberta, aoFechar, titulo, children, travada = false, est
             onClick={travada ? undefined : aoFechar}
           />
           <motion.div
-            className="ui-folha" style={estilo}
+            className={`ui-folha ${classe}`} style={estilo}
             role="dialog" aria-modal="true" aria-label={titulo}
             initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={MOLA}
             drag={travada ? false : "y"} dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.6 }}
@@ -144,9 +144,37 @@ export function CheckAnimado({ tamanho = 88, cor = "var(--ui-verde)" }) {
 }
 
 // ---------- Anel de certeza (quanto mais cheio, mais certeza) ----------
-export function AnelCerteza({ nivel }) {
+export function AnelCerteza({ nivel, variante }) {
   const mapa = { alta: [0.92, "var(--ui-verde)", "Alta"], media: [0.6, "var(--ui-ambar)", "Média"], baixa: [0.28, "var(--ui-vermelho)", "Baixa"] };
   const [p, cor, rotulo] = mapa[nivel] || mapa.baixa;
+  const id = useId().replace(/:/g, "");
+  if (variante === "3d") {
+    // Exceção de cor: certeza alta é verde, mesmo nos apps que só usam uma cor de destaque.
+    const cor3d = nivel === "alta" ? "var(--ui-certeza-alta, var(--ui-verde))" : cor;
+    // Versão "3D de mentira": disco com luz e sombra, anel com brilho, e a palavra "Certeza" fora do anel (mais espaço).
+    return (
+      <motion.div className="ui-anel3d" style={{ "--anel-cor": cor3d }} role="img" aria-label={`Certeza ${rotulo.toLowerCase()}`}
+        initial={{ rotateX: 50, scale: 0.7, opacity: 0 }} animate={{ rotateX: 12, scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 260, damping: 18, delay: 0.1 }}>
+        <span className="ui-anel3d__roda">
+          <span className="ui-anel3d__disco" aria-hidden="true" />
+          <svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true">
+            <defs>
+              <linearGradient id={`g${id}`} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor={`color-mix(in srgb, ${cor3d} 35%, #fff)`} />
+                <stop offset="45%" stopColor={cor3d} />
+                <stop offset="100%" stopColor={`color-mix(in srgb, ${cor3d} 60%, #000)`} />
+              </linearGradient>
+            </defs>
+            <circle cx="48" cy="48" r="41" fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="9" />
+            <motion.circle cx="48" cy="48" r="41" fill="none" stroke={`url(#g${id})`} strokeWidth="9" strokeLinecap="round"
+              transform="rotate(-90 48 48)" initial={{ pathLength: 0 }} animate={{ pathLength: p }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }} />
+          </svg>
+          <strong className="ui-anel3d__nivel">{rotulo}</strong>
+        </span>
+        <span className="ui-anel3d__legenda">Certeza</span>
+      </motion.div>
+    );
+  }
   return (
     <div className="ui-anel" role="img" aria-label={`Certeza ${rotulo.toLowerCase()}`}>
       <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">

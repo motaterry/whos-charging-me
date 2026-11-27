@@ -15,15 +15,16 @@ import { BANCO, COMPRAS_PAINEL, GASTOS, BANCOS_FICTICIOS } from "./dados.js";
 import fotoLogin from "../assets/prototipos/login-fundo.webp";
 
 const TELAS = [
-  { id: "boas-vindas", nome: "Boas-vindas" },
-  { id: "conta", nome: "Criar conta" },
-  { id: "chat", nome: "Chat que monta o painel" },
-  { id: "bancos", nome: "Escolher bancos" },
-  { id: "permissao", nome: "Permissão (Open Finance)" },
-  { id: "painel", nome: "Painel" },
-  { id: "compra", nome: "Compra sem certeza" },
-  { id: "contestar", nome: "Contestar" },
-  { id: "acompanhar", nome: "Acompanhar o estorno" },
+  // "acao" = o que a pessoa faz nesta tela para seguir no caminho feliz (aparece no user flow do Guia).
+  { id: "boas-vindas", nome: "Boas-vindas", acao: "Toca em \"Criar conta grátis\"" },
+  { id: "conta", nome: "Criar conta", acao: "Preenche nome, e-mail e senha e toca em \"Continuar\"" },
+  { id: "chat", nome: "Chat que monta o painel", acao: "Responde 2 perguntas tocando nas opções" },
+  { id: "bancos", nome: "Escolher bancos", acao: "Escolhe os bancos e toca em \"Continuar\"" },
+  { id: "permissao", nome: "Permissão (Open Finance)", acao: "Lê o que vamos ver e autoriza no app do banco" },
+  { id: "painel", nome: "Painel", acao: "Toca na compra que precisa de atenção" },
+  { id: "compra", nome: "Compra sem certeza", acao: "Toca em \"Não reconheço, quero contestar\"" },
+  { id: "contestar", nome: "Contestar", acao: "Copia o texto, contesta no app do banco e toca em \"Já enviei\"" },
+  { id: "acompanhar", nome: "Acompanhar o estorno", acao: "Fim: acompanha até o dinheiro voltar" },
 ];
 
 const NOTAS = {
@@ -52,10 +53,10 @@ export default function Cenario2() {
   function recomecar() { setErro(null); setEscolhas({}); setBancos([BANCO, "Banco Horizonte"]); nav.trocar("boas-vindas"); }
   const comErro = (t, e) => () => { setErro(e); if (!escolhas.objetivo) setEscolhas({ objetivo: "Os dois", aviso: "Sim, me avise" }); irAte(t); };
   const ERROS = [
-    { id: "cadastro", nome: "E-mail ou senha errados", descricao: "Toque em Continuar. O app explica o que corrigir.", acao: comErro("conta", "cadastro") },
-    { id: "recusou", nome: "Não autorizou no banco", descricao: "A pessoa cancela no app do banco. Oferecemos tentar de novo.", acao: comErro("permissao", "recusou") },
-    { id: "banco-fora", nome: "Um banco não respondeu", descricao: "Mostramos o que veio dos outros bancos e avisamos.", acao: comErro("painel", "banco-fora") },
-    { id: "vazio", nome: "Nenhuma compra estranha", descricao: "Painel sem nada para conferir.", acao: comErro("painel", "vazio") },
+    { id: "cadastro", tela: "conta", nome: "E-mail ou senha errados", descricao: "Toque em Continuar. O app explica o que corrigir.", acao: comErro("conta", "cadastro") },
+    { id: "recusou", tela: "permissao", nome: "Não autorizou no banco", descricao: "A pessoa cancela no app do banco. Oferecemos tentar de novo.", acao: comErro("permissao", "recusou") },
+    { id: "banco-fora", tela: "painel", nome: "Um banco não respondeu", descricao: "Mostramos o que veio dos outros bancos e avisamos.", acao: comErro("painel", "banco-fora") },
+    { id: "vazio", tela: "painel", nome: "Nenhuma compra estranha", descricao: "Painel sem nada para conferir.", acao: comErro("painel", "vazio") },
   ];
   const bloqueado = () => setAviso({ texto: "No protótipo, esta parte ainda não abre." });
 
