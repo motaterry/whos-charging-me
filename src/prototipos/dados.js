@@ -1,7 +1,9 @@
 // Dados de exemplo dos protótipos. Tudo é inventado: lojas, CNPJs, bancos e pessoas.
 // Os CNPJs começam com 00.000 para deixar claro que não são de verdade.
 
-export const BANCO = "Banco Exemplo"; // banco fictício (não usar marca real)
+import { BANCO_FICTICIO } from "./marca.js";
+
+export const BANCO = BANCO_FICTICIO.nome; // banco fictício (troque em marca.js)
 
 export const COMPRAS_FATURA = [
   { id: "mercado", nome: "SUPERMERCADO IDEAL", valor: "R$ 187,40", data: "25/11", categoria: "Mercado", estranho: false },
@@ -43,9 +45,9 @@ export const API_RESPOSTA = {
 
 // Cenário 2: compras que o app achou nas faturas conectadas.
 export const COMPRAS_PAINEL = [
-  { id: "padaria", nome: "MP*PADARIABOMDIA", valor: "R$ 32,50", data: "24/11", banco: "Banco Exemplo", loja: "Padaria Bom Dia", certeza: "alta" },
+  { id: "padaria", nome: "MP*PADARIABOMDIA", valor: "R$ 32,50", data: "24/11", banco: BANCO, loja: "Padaria Bom Dia", certeza: "alta" },
   { id: "lanches", nome: "PAG*LANCHESDOZE", valor: "R$ 24,00", data: "22/11", banco: "Banco Horizonte", loja: "Lanches do Zé (MEI)", certeza: "media" },
-  { id: "xqz", nome: "INT*XQZ7 SERVICOS", valor: "R$ 89,90", data: "20/11", banco: "Banco Exemplo", loja: null, certeza: "baixa" },
+  { id: "xqz", nome: "INT*XQZ7 SERVICOS", valor: "R$ 89,90", data: "20/11", banco: BANCO, loja: null, certeza: "baixa" },
 ];
 
 export const GASTOS = [
@@ -56,4 +58,4 @@ export const GASTOS = [
   { nome: "Outros", valor: 114, cor: "#6e6e73" },
 ];
 
-export const BANCOS_FICTICIOS = ["Banco Exemplo", "Banco Horizonte", "Banco Ipê", "Cooperativa Vale"];
+export const BANCOS_FICTICIOS = [BANCO, "Banco Horizonte", "Banco Ipê", "Cooperativa Vale"];

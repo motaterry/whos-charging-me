@@ -2,15 +2,16 @@
 // - faixa no topo dizendo que é protótipo (nada é real);
 // - "Tela X de Y" e o nome da tela (a pessoa sabe onde está);
 // - botões Voltar e Recomeçar (a pessoa pode sair de qualquer tela);
-// - uma nota "O que mostrar nesta tela", para quem apresenta.
+// - uma nota "O que mostrar nesta tela", para quem apresenta;
+// - "Casos de erro": botões que mostram o que acontece quando algo dá errado.
 import { useEffect, useRef } from "react";
 
-export default function Moldura({ titulo, telas, atual, irPara, nota, children }) {
+export default function Moldura({ titulo, telas, atual, irPara, nota, erros = [], erroAtual, children }) {
   const indice = telas.findIndex((t) => t.id === atual);
   const tela = telas[indice];
   const rolagem = useRef(null);
   // Ao trocar de tela, volta para o topo do celular.
-  useEffect(() => { if (rolagem.current) rolagem.current.scrollTop = 0; }, [atual]);
+  useEffect(() => { if (rolagem.current) rolagem.current.scrollTop = 0; }, [atual, erroAtual]);
   return (
     <div className="proto">
       <header className="proto__topo">
@@ -45,6 +46,22 @@ export default function Moldura({ titulo, telas, atual, irPara, nota, children }
             <div className="proto__nota">
               <h2>O que mostrar nesta tela</h2>
               <p>{nota}</p>
+            </div>
+          )}
+          {erros.length > 0 && (
+            <div className="proto__erros">
+              <h2>Casos de erro</h2>
+              <p className="ajuda-texto">Toque para ver o que a pessoa vê quando algo dá errado.</p>
+              <ul>
+                {erros.map((e) => (
+                  <li key={e.id}>
+                    <button type="button" className={`proto__erro${erroAtual === e.id ? " proto__erro--ativo" : ""}`} aria-pressed={erroAtual === e.id} onClick={e.acao}>
+                      <strong>{e.nome}</strong>
+                      <span>{e.descricao}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
           <details className="proto__lista">
