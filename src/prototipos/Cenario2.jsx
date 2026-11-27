@@ -498,16 +498,16 @@ function Painel({ erro, escolhas, aoTentarDeNovo, aoAbrir, aoBloqueado }) {
               <motion.div className="b2-saldo" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={MOLA}>
                 <p className="b2-saldo__rotulo"><Icone nome="brilho" tamanho={15} /> Compras com nome estranho · novembro</p>
                 <div className="b2-saldo__linha">
-                  <p id="estranhas" className="b2-saldo__numero">{compras.length}</p>
+                  <button type="button" id="estranhas" className="b2-saldo__numero" onClick={() => setAba("todas")} aria-label={`${compras.length} compras com nome estranho. Ver todas`}>{compras.length}</button>
                   <Toque className="ui-botao b2-botao-cinza b2-saldo__botao" onClick={aoBloqueado}>+ Banco</Toque>
                 </div>
                 <p className="b2-saldo__texto">
-                  {compras.length - semCerteza} já identificadas{semCerteza ? <> · <em>{semCerteza} precisa de você</em></> : ""}
+                  {compras.length - semCerteza} já identificadas
+                  {semCerteza > 0 && <> · <button type="button" className="b2-saldo__filtro" onClick={() => setAba("atencao")}>{semCerteza} precisa de você</button></>}
                 </p>
               </motion.div>
-              {/* 3 botões lado a lado: 1 principal e 2 cinza */}
-              <div className="b2-tres">
-                <Toque className="ui-botao ui-botao--principal" onClick={semCerteza ? aoAbrir : aoBloqueado}>Resolver</Toque>
+              {/* 2 botões cinza. Resolver uma compra é feito tocando nela na lista. */}
+              <div className="b2-tres b2-tres--dois">
                 <Toque className="ui-botao b2-botao-cinza" onClick={aoBloqueado}>Gastos</Toque>
                 <Toque className="ui-botao b2-botao-cinza" onClick={aoBloqueado}>Relatório</Toque>
               </div>
