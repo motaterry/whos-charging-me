@@ -1,0 +1,11 @@
+
+  VITE v8.3.8  ready in 317 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+5:29:53 PM [vite] (client) hmr update /src/prototipos/prototipos.css
+5:30:02 PM [vite] (client) hmr update /src/prototipos/prototipos.css
+5:31:28 PM [vite] (client) hmr update /src/prototipos/prototipos.css
+5:31:28 PM [vite] (client) hmr update /src/prototipos/Cenario1.jsx
+5:31:34 PM [vite] (client) hmr update /src/prototipos/Cenario1.jsx
+5:31:34 PM [vite] (client) hmr update /src/prototipos/prototipos.css
