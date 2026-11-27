@@ -62,7 +62,7 @@ export default function Cenario2() {
 
   return (
     <Moldura
-      titulo="Cenário 2: o nosso app (visão de futuro)"
+      titulo="Dentro do app de finanças"
       subtitulo="Para pessoas (B2C). Login, Open Finance e todas as faturas num lugar só."
       telas={TELAS} atual={nav.atual} irPara={irPara}
       aoVoltar={nav.voltar} podeVoltar={nav.tamanho > 1} aoRecomecar={recomecar}
