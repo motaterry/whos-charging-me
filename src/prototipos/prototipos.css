@@ -1023,3 +1023,14 @@
 .c6 .c6-tecnico { border-radius: 6px; }
 /* Selo de certeza 3D igual ao do "Dentro do app de finanças": alta verde, média e baixa em amarelo */
 .c6 { --ui-certeza-alta: #34c759; --ui-ambar: var(--cor-destaque); --ui-vermelho: var(--cor-destaque); }
+/* Histórico limpo, como o extrato real do C6 (print da Terry, 27/11): títulos "Hoje"/"Ontem" simples,
+   ícone redondo cinza, nome, "hora · tipo" e valor à direita. Sem selos na lista. */
+.c6 .c6-dia { background: none; padding: var(--ep-6) var(--ep-margem-tela) var(--ep-2); font-size: 15px; color: var(--c6-suave); }
+.c6 .c6-extrato__item { grid-template-columns: auto 1fr auto; padding: var(--ep-4) var(--ep-margem-tela); border-bottom: 1px solid #ededf0; }
+.c6 .c6-extrato__icone { width: 44px; height: 44px; align-self: center; margin: 0; background: #f0f0f2; }
+.c6 .c6-extrato__meio { gap: 2px; }
+.c6 .c6-extrato__nome { font-size: 15px; font-weight: 500; text-transform: none; letter-spacing: 0; color: #1d1d1f; }
+.c6 .c6-extrato__meio small { font-size: 13.5px; color: var(--c6-suave); }
+.c6 .c6-extrato__valor { margin: 0; font-size: 15px; font-weight: 600; }
+.c6-quem__inicio { display: grid; gap: var(--ep-3); }
+.c6-quem__pergunta { margin: 0; font-size: 19px; font-weight: 500; }

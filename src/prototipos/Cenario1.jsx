@@ -19,26 +19,26 @@ const TELAS = [
   // "acao" = o que a pessoa faz nesta tela para seguir no caminho feliz (aparece no user flow do Guia).
   { id: "inicio", nome: "Tela inicial do banco", acao: "Toca no destaque \"Não reconhece uma compra?\"", alternativa: "Ou toca no atalho \"Cartão\": abre a mesma tela" },
   { id: "cartao", nome: "Cartão e fatura", acao: "Toca na compra de nome estranho (MP*PADARIABOMDIA)" },
-  { id: "detalhe", nome: "Quem cobrou (loja achada)", acao: "Vê a loja e toca em \"Não reconheço\"", alternativa: "Ou toca em \"Reconheço esta compra\": a compra fica marcada e volta ao cartão" },
+  { id: "detalhe", nome: "Recibo e quem cobrou", acao: "Toca em \"Quem cobrou?\", vê a loja e toca em \"Não reconheço\"", alternativa: "Ou toca em \"Reconheço esta compra\": a compra fica marcada e volta ao cartão" },
   { id: "contestar", nome: "Contestar com provas", acao: "Escolhe o motivo, revisa e confirma o envio" },
   { id: "enviado", nome: "Contestação enviada", acao: "Fim: guarda o protocolo e volta ao cartão" },
 ];
 
 const NOTAS = {
   inicio: "Tela inicial do app do banco, igual à de todo dia. Logo abaixo dos atalhos, em \"Pra você\", fica o nosso destaque: \"Não reconhece uma compra?\". A pessoa não instala nada e não faz login novo. Toque no destaque.",
-  cartao: "A fatura do cartão. Os nomes estranhos ganham a marca \"Quem é?\". Toque na padaria.",
-  detalhe: "O banco mandou o nome e o local para a nossa API. A tela mostra cada etapa da busca, depois a loja, a certeza, o mapa e as fontes. A pessoa pode mudar a categoria. Abra \"Ver por trás\" para mostrar a parte técnica ao júri.",
+  cartao: "A fatura do cartão. O histórico fica limpo, igual ao do banco: nome, hora e valor. Toque na padaria (MP*PADARIABOMDIA).",
+  detalhe: "O recibo da compra. O botão \"Quem cobrou?\" só aparece aqui. Ao tocar, o banco manda o nome e o local para a nossa API. A tela mostra cada etapa da busca, depois a loja, a certeza, o mapa e as fontes. A pessoa pode mudar a categoria. Abra \"Ver por trás\" para mostrar a parte técnica ao júri.",
   contestar: "As provas que a API achou já vão junto: loja, CNPJ, endereço e distância. A pessoa não digita nada. Antes de enviar, o app pede confirmação.",
   enviado: "O banco recebe a contestação com provas. A pessoa vê o protocolo e o andamento no próprio app.",
 };
 
 const COMPRAS = [
-  { grupo: "Hoje", itens: [{ id: "mercado", nome: "Supermercado Ideal", cat: "Mercado", valor: "187,40", icone: "carrinho", cor: "#5aa9ff" }] },
-  { grupo: "Ontem", itens: [{ id: "padaria", nome: "MP*PADARIABOMDIA", cat: "Outros", valor: "32,50", estranho: true }] },
-  { grupo: "23 nov", itens: [{ id: "posto", nome: "Posto Avenida", cat: "Transporte", valor: "150,00", icone: "combustivel", cor: "#ffa93a" }] },
+  { grupo: "Hoje", itens: [{ id: "mercado", nome: "Supermercado Ideal", cat: "Mercado", valor: "187,40", icone: "carrinho", cor: "#5aa9ff", hora: "13:21" }] },
+  { grupo: "Ontem", itens: [{ id: "padaria", nome: "MP*PADARIABOMDIA", cat: "Outros", valor: "32,50", estranho: true, hora: "08:12" }] },
+  { grupo: "23 nov", itens: [{ id: "posto", nome: "Posto Avenida", cat: "Transporte", valor: "150,00", icone: "combustivel", cor: "#ffa93a", hora: "18:40" }] },
   { grupo: "22 nov", itens: [
-    { id: "lanches", nome: "PAG*LANCHESDOZE", cat: "Outros", valor: "24,00", estranho: true },
-    { id: "farmacia", nome: "Farmácia Saúde Mais", cat: "Saúde", valor: "58,90", icone: "remedio", cor: "#ff6fa5" },
+    { id: "lanches", nome: "PAG*LANCHESDOZE", cat: "Outros", valor: "24,00", estranho: true, hora: "12:05" },
+    { id: "farmacia", nome: "Farmácia Saúde Mais", cat: "Saúde", valor: "58,90", icone: "remedio", cor: "#ff6fa5", hora: "09:30" },
   ] },
 ];
 
@@ -300,18 +300,12 @@ function Cartao({ movida, reconhecida, contestada, aoTocar, aoInicio, aoBloquead
                   return (
                     <motion.li key={c.id} variants={itemEmSequencia}>
                       <button type="button" className="c6-extrato__item" onClick={padaria ? aoTocar : aoBloqueado}>
-                        <span className="c6-extrato__icone"><Icone nome={c.estranho && !ident ? "interrogacao" : c.estranho ? "pao" : c.icone} tamanho={18} /></span>
+                        <span className="c6-extrato__icone"><Icone nome={ident ? "pao" : c.icone || "carrinho"} tamanho={20} /></span>
                         <span className="c6-extrato__meio">
-                          <small>Compra no crédito</small>
-                          <span className={`c6-extrato__nome${c.estranho && !ident ? " c6-extrato__nome--cru" : ""}`}>{nome}</span>
-                          <span className="c6-extrato__valor">R$ {c.valor}</span>
+                          <span className="c6-extrato__nome">{nome}</span>
+                          <small>{c.hora} · Crédito{padaria && contestada ? " · Em contestação" : ""}</small>
                         </span>
-                        <span className="c6-extrato__fim">
-                          {c.estranho && !ident && <span className="c6-selo c6-selo--quem">Quem é?</span>}
-                          {ident && !contestada && <span className="c6-selo">Identificada</span>}
-                          {padaria && contestada && <span className="c6-selo c6-selo--escuro">Em contestação</span>}
-                          {(padaria || c.estranho) && <Icone nome="seta" tamanho={16} />}
-                        </span>
+                        <span className="c6-extrato__valor">R$ {c.valor}</span>
                       </button>
                     </motion.li>
                   );
@@ -336,7 +330,9 @@ const R_BAIXA = {
 
 // ---------- Tela 2: detalhe da compra com a loja achada ----------
 function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer, aoContestar }) {
-  const [fase, setFase] = useState("analisando");
+  // "inicial": o recibo mostra o botão "Quem cobrou?". A busca só começa quando a pessoa toca nele.
+  // Nos casos de erro do Guia, a busca já começa sozinha para mostrar o erro.
+  const [fase, setFase] = useState(erro ? "analisando" : "inicial");
   const terminar = useCallback(() => setFase("pronto"), []);
   const falhou = erro === "api";
   const baixa = erro === "baixa";
@@ -353,10 +349,18 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
           <p className="c6-heroi__cru">MP*PADARIABOMDIA</p>
         </div>
 
-        <section className="c6-quem" aria-labelledby="quem-titulo" aria-busy={!pronto}>
-          <p className="c6-quem__marca"><Icone nome="busca" tamanho={15} /> Quem cobrou · conferido na Receita</p>
+        <section className="c6-quem" aria-labelledby="quem-titulo" aria-busy={fase === "analisando"}>
+          {fase !== "inicial" && <p className="c6-quem__marca"><Icone nome="busca" tamanho={15} /> Quem cobrou · conferido na Receita</p>}
           <AnimatePresence mode="wait" initial={false}>
-            {!pronto ? (
+            {fase === "inicial" ? (
+              <motion.div key="inicial" className="c6-quem__inicio" exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
+                <h3 id="quem-titulo" className="c6-quem__pergunta">Não reconhece este nome?</h3>
+                <p className="c6-rotulo-fino">Nomes assim vêm da maquininha. A gente procura a loja na Receita e mostra onde ela fica.</p>
+                <Toque className="ui-botao ui-botao--principal ui-botao--largo" onClick={() => setFase("analisando")}>
+                  <Icone nome="busca" tamanho={18} /> Quem cobrou?
+                </Toque>
+              </motion.div>
+            ) : !pronto ? (
               <motion.div key="analise" exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
                 <h3 id="quem-titulo" className="visualmente-oculto">Procurando a loja</h3>
                 <PassosAnalise passos={PASSOS} aoTerminar={terminar} />
@@ -441,7 +445,7 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
             </>
           ) : (
             <>
-              <Toque className="ui-botao ui-botao--principal" disabled={!pronto} onClick={aoReconhecer}>Reconheço esta compra</Toque>
+              <Toque className={`ui-botao ${fase === "inicial" ? "ui-botao--contorno" : "ui-botao--principal"}`} disabled={fase === "analisando"} onClick={aoReconhecer}>Reconheço esta compra</Toque>
               <Toque className="ui-botao ui-botao--contorno" onClick={aoContestar}>Não reconheço</Toque>
             </>
           )}
