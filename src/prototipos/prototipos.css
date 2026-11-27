@@ -1034,3 +1034,27 @@
 .c6 .c6-extrato__valor { margin: 0; font-size: 15px; font-weight: 600; }
 .c6-quem__inicio { display: grid; gap: var(--ep-3); }
 .c6-quem__pergunta { margin: 0; font-size: 19px; font-weight: 500; }
+/* Recibo da compra (estrutura do print de recibo que a Terry mandou, 27/11) */
+.c6-recibo-tela { background: #3a3a3c; }
+.c6 .ui-tela:has(.c6-recibo-tela), .c6 .ui-tela:has(.c6-recibo-tela)::after { background: #3a3a3c; }
+.c6-recibo { margin-top: var(--ep-3); padding-top: var(--ep-2); }
+.c6-recibo__fechar { margin: 0 0 0 var(--ep-2); width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: none; color: #1d1d1f; cursor: pointer; border-radius: 50%; }
+.c6-recibo__topo { display: grid; justify-items: start; padding: var(--ep-4) var(--ep-margem-tela) 0; }
+.c6-recibo__icone { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: #f0f0f2; margin-bottom: var(--ep-4); }
+.c6-recibo__nome { margin: 0; font-size: 26px; font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
+.c6-recibo__valor { margin: var(--ep-2) 0 0; font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.c6-recibo__data { margin: var(--ep-3) 0 0; font-size: 15px; letter-spacing: .3px; }
+.c6-recibo__tag { margin-top: var(--ep-3); padding: 2px var(--ep-2); border-radius: 4px; background: #f0f0f2; font-size: 13px; color: #3a3a3c; }
+.c6-redondos { list-style: none; margin: var(--ep-6) 0 var(--ep-2); padding: 0 var(--ep-2); display: grid; grid-template-columns: repeat(3, 1fr); }
+.c6-redondo { width: 100%; display: grid; justify-items: center; gap: var(--ep-2); border: 0; background: none; font: inherit; font-size: 13.5px; font-weight: 500; color: #1d1d1f; cursor: pointer; padding: var(--ep-1) 0; }
+.c6-redondo__bola { width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; background: #f0f0f2; }
+.c6-redondo--destaque .c6-redondo__bola { background: var(--cor-destaque); }
+.c6-redondo--destaque[aria-pressed="true"] .c6-redondo__bola { box-shadow: inset 0 0 0 2px #1d1d1f; }
+.c6-campos { margin: var(--ep-5) 0 0; }
+.c6-campos > div { display: flex; justify-content: space-between; align-items: center; gap: var(--ep-3); padding: var(--ep-4) var(--ep-margem-tela); border-top: 1px solid #ededf0; }
+.c6-campos dt { font-size: 14px; color: var(--c6-suave); }
+.c6-campos dd { margin: 2px 0 0; font-size: 16px; font-weight: 500; overflow-wrap: anywhere; }
+.c6-campos dd small { font-size: 13px; font-weight: 400; color: var(--c6-suave); }
+.c6-campos__cru { text-transform: uppercase; }
+.c6-pilula { flex: none; min-height: 40px; padding: 0 var(--ep-4); border: 0; border-radius: 99px; background: #f0f0f2; color: #1d1d1f; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.c6-pilula--amarela { background: var(--cor-destaque); }

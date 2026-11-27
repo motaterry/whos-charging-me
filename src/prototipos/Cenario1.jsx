@@ -19,7 +19,7 @@ const TELAS = [
   // "acao" = o que a pessoa faz nesta tela para seguir no caminho feliz (aparece no user flow do Guia).
   { id: "inicio", nome: "Tela inicial do banco", acao: "Toca no destaque \"Não reconhece uma compra?\"", alternativa: "Ou toca no atalho \"Cartão\": abre a mesma tela" },
   { id: "cartao", nome: "Cartão e fatura", acao: "Toca na compra de nome estranho (MP*PADARIABOMDIA)" },
-  { id: "detalhe", nome: "Recibo e quem cobrou", acao: "Toca em \"Quem cobrou?\", vê a loja e toca em \"Não reconheço\"", alternativa: "Ou toca em \"Reconheço esta compra\": a compra fica marcada e volta ao cartão" },
+  { id: "detalhe", nome: "Recibo e quem cobrou", acao: "Toca no botão redondo \"Quem cobrou?\", vê a loja e toca em \"Não reconheço\"", alternativa: "Ou toca em \"Reconheço esta compra\": a compra fica marcada e volta ao cartão" },
   { id: "contestar", nome: "Contestar com provas", acao: "Escolhe o motivo, revisa e confirma o envio" },
   { id: "enviado", nome: "Contestação enviada", acao: "Fim: guarda o protocolo e volta ao cartão" },
 ];
@@ -27,7 +27,7 @@ const TELAS = [
 const NOTAS = {
   inicio: "Tela inicial do app do banco, igual à de todo dia. Logo abaixo dos atalhos, em \"Pra você\", fica o nosso destaque: \"Não reconhece uma compra?\". A pessoa não instala nada e não faz login novo. Toque no destaque.",
   cartao: "A fatura do cartão. O histórico fica limpo, igual ao do banco: nome, hora e valor. Toque na padaria (MP*PADARIABOMDIA).",
-  detalhe: "O recibo da compra. O botão \"Quem cobrou?\" só aparece aqui. Ao tocar, o banco manda o nome e o local para a nossa API. A tela mostra cada etapa da busca, depois a loja, a certeza, o mapa e as fontes. A pessoa pode mudar a categoria. Abra \"Ver por trás\" para mostrar a parte técnica ao júri.",
+  detalhe: "O recibo da compra. O recibo segue o padrão dos bancos digitais: nome, valor, data, botões redondos e campos. O botão \"Quem cobrou?\" só aparece aqui. Ao tocar, o banco manda o nome e o local para a nossa API. A tela mostra cada etapa da busca, depois a loja, a certeza, o mapa e as fontes. A pessoa pode mudar a categoria. Abra \"Ver por trás\" para mostrar a parte técnica ao júri.",
   contestar: "As provas que a API achou já vão junto: loja, CNPJ, endereço e distância. A pessoa não digita nada. Antes de enviar, o app pede confirmação.",
   enviado: "O banco recebe a contestação com provas. A pessoa vê o protocolo e o andamento no próprio app.",
 };
@@ -89,7 +89,8 @@ export default function Cenario1() {
               aoTentarDeNovo={() => setErro(null)}
               aoVoltar={nav.voltar}
               aoReconhecer={() => { setReconhecida(true); nav.voltar(); setAviso({ texto: "Pronto. Marcamos como reconhecida." }); }}
-              aoContestar={() => { setAviso(null); nav.ir("contestar"); }} />
+              aoContestar={() => { setAviso(null); nav.ir("contestar"); }}
+              aoBloqueado={() => setAviso({ texto: "No protótipo, este botão não abre nada." })} />
           )}
           {nav.atual === "contestar" && <Contestar erro={erro} baixa={erro === "baixa"} aoVoltar={nav.voltar} aoEnviado={() => nav.ir("enviado")} />}
           {nav.atual === "enviado" && <Enviado aoFim={() => { setContestada(true); nav.trocar("inicio"); nav.ir("cartao"); setErro(null); }} />}
@@ -328,104 +329,131 @@ const R_BAIXA = {
   distancia: "3,2 km",
 };
 
-// ---------- Tela 2: detalhe da compra com a loja achada ----------
-function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer, aoContestar }) {
-  // "inicial": o recibo mostra o botão "Quem cobrou?". A busca só começa quando a pessoa toca nele.
+// ---------- Tela 2: recibo da compra (estrutura de recibo de banco digital, visual C6) ----------
+// Folha branca com X, ícone redondo, nome e valor grandes, data e etiqueta "Compra".
+// Botões redondos: "Quem cobrou?" (a nossa função), "Preciso de ajuda" (contestar) e "Comprovante".
+// Embaixo, os campos: Estabelecimento, Nome original, Cartão e Categoria.
+function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer, aoContestar, aoBloqueado }) {
+  // "inicial": a busca só começa quando a pessoa toca em "Quem cobrou?".
   // Nos casos de erro do Guia, a busca já começa sozinha para mostrar o erro.
   const [fase, setFase] = useState(erro ? "analisando" : "inicial");
   const terminar = useCallback(() => setFase("pronto"), []);
   const falhou = erro === "api";
   const baixa = erro === "baixa";
   const pronto = fase === "pronto";
+  const achou = pronto && !falhou;
+  const loja = baixa ? R_BAIXA.loja : R.loja;
+  const estabelecimento = achou && !baixa ? R.loja : "MP*PADARIABOMDIA";
 
   return (
-    <div className="ui-rolagem c6-tela">
-      <C6Barra titulo="Detalhe da compra" aoVoltar={aoVoltar} rotuloVoltar="Voltar para Cartões" />
-      <div className="c6-corpo">
-        <span className="c6-corpo__pegador" aria-hidden="true" />
-        <div className="c6-heroi">
-          <p className="c6-rotulo-fino">Compra no crédito · ontem, 08:12</p>
-          <p className="c6-valor-grande"><small>R$</small> 32,50</p>
-          <p className="c6-heroi__cru">MP*PADARIABOMDIA</p>
+    <div className="ui-rolagem c6-tela c6-recibo-tela">
+      <div className="c6-corpo c6-recibo">
+        <button type="button" className="c6-recibo__fechar" onClick={aoVoltar} aria-label="Fechar recibo e voltar para Cartões">
+          <Icone nome="x" tamanho={24} traco={2} />
+        </button>
+
+        <div className="c6-recibo__topo">
+          <span className="c6-recibo__icone"><Icone nome={achou && !baixa ? "pao" : "carrinho"} tamanho={24} /></span>
+          <h2 className="c6-recibo__nome">{estabelecimento}</h2>
+          <p className="c6-recibo__valor">R$ 32,50</p>
+          <p className="c6-recibo__data">24 NOV 2026 08:12</p>
+          <span className="c6-recibo__tag">Compra</span>
         </div>
 
-        <section className="c6-quem" aria-labelledby="quem-titulo" aria-busy={fase === "analisando"}>
-          {fase !== "inicial" && <p className="c6-quem__marca"><Icone nome="busca" tamanho={15} /> Quem cobrou · conferido na Receita</p>}
-          <AnimatePresence mode="wait" initial={false}>
-            {fase === "inicial" ? (
-              <motion.div key="inicial" className="c6-quem__inicio" exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
-                <h3 id="quem-titulo" className="c6-quem__pergunta">Não reconhece este nome?</h3>
-                <p className="c6-rotulo-fino">Nomes assim vêm da maquininha. A gente procura a loja na Receita e mostra onde ela fica.</p>
-                <Toque className="ui-botao ui-botao--principal ui-botao--largo" onClick={() => setFase("analisando")}>
-                  <Icone nome="busca" tamanho={18} /> Quem cobrou?
-                </Toque>
-              </motion.div>
-            ) : !pronto ? (
-              <motion.div key="analise" exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
-                <h3 id="quem-titulo" className="visualmente-oculto">Procurando a loja</h3>
-                <PassosAnalise passos={PASSOS} aoTerminar={terminar} />
-                <div className="b1-quem__esqueleto"><Esqueleto largura="60%" altura={22} /><Esqueleto largura="90%" /><Esqueleto largura="75%" /></div>
-              </motion.div>
-            ) : falhou ? (
-              <motion.div key="erro" className="c6-erro" role="alert" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={MOLA}>
-                <span className="c6-erro__icone"><Icone nome="alerta" tamanho={24} /></span>
-                <h3 id="quem-titulo">Não conseguimos descobrir a loja agora</h3>
-                <p>O serviço que procura a loja não respondeu. A compra continua na sua fatura e nada mudou.</p>
-                <p>Tente de novo em alguns segundos, ou conteste mesmo assim.</p>
-              </motion.div>
-            ) : (
-              <motion.div key="ok" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={MOLA}>
-                <div className="c6-quem__cabeca">
-                  <div>
-                    {baixa && <p className="c6-rotulo-fino">Não temos certeza. O mais provável é</p>}
-                    <h3 id="quem-titulo" className="c6-quem__loja">{baixa ? R_BAIXA.loja : R.loja}</h3>
-                    <p className="c6-rotulo-fino">{baixa ? "Lanchonete" : R.atividade}</p>
-                  </div>
-                  <AnelCerteza nivel={baixa ? "baixa" : "alta"} variante="3d" />
-                </div>
-                <p className="c6-importante"><span className="c6-importante__i" aria-hidden="true">i</span>{baixa ? R_BAIXA.porque : R.porque}</p>
-                <MapaFalso distancia={baixa ? R_BAIXA.distancia : R.distancia} longe={baixa} />
-                {!baixa && (
-                  <div className="c6-caixas">
-                    <C6Caixa rotulo="CNPJ">{R.cnpj}</C6Caixa>
-                    <C6Caixa rotulo="Endereço">{R.endereco}</C6Caixa>
-                    <C6Caixa rotulo="Situação na Receita">Ativa</C6Caixa>
-                  </div>
+        <ul className="c6-redondos" aria-label="Ações da compra">
+          <li>
+            <button type="button" className="c6-redondo c6-redondo--destaque" onClick={() => fase === "inicial" && setFase("analisando")} aria-pressed={fase !== "inicial"}>
+              <span className="c6-redondo__bola"><Icone nome="busca" tamanho={24} /></span>
+              <span>Quem cobrou?</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" className="c6-redondo" onClick={aoContestar}>
+              <span className="c6-redondo__bola"><Icone nome="alerta" tamanho={22} /></span>
+              <span>Preciso de ajuda</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" className="c6-redondo" onClick={aoBloqueado}>
+              <span className="c6-redondo__bola"><Icone nome="extrato" tamanho={22} /></span>
+              <span>Comprovante</span>
+            </button>
+          </li>
+        </ul>
+
+        <AnimatePresence initial={false}>
+          {fase !== "inicial" && (
+            <motion.section className="c6-quem" aria-labelledby="quem-titulo" aria-busy={fase === "analisando"}
+              initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} transition={{ duration: 0.3 }}>
+              <p className="c6-quem__marca"><Icone nome="busca" tamanho={15} /> Quem cobrou · conferido na Receita</p>
+              <AnimatePresence mode="wait" initial={false}>
+                {!pronto ? (
+                  <motion.div key="analise" exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
+                    <h3 id="quem-titulo" className="visualmente-oculto">Procurando a loja</h3>
+                    <PassosAnalise passos={PASSOS} aoTerminar={terminar} />
+                    <div className="b1-quem__esqueleto"><Esqueleto largura="60%" altura={22} /><Esqueleto largura="90%" /><Esqueleto largura="75%" /></div>
+                  </motion.div>
+                ) : falhou ? (
+                  <motion.div key="erro" className="c6-erro" role="alert" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={MOLA}>
+                    <span className="c6-erro__icone"><Icone nome="alerta" tamanho={24} /></span>
+                    <h3 id="quem-titulo">Não conseguimos descobrir a loja agora</h3>
+                    <p>O serviço que procura a loja não respondeu. A compra continua na sua fatura e nada mudou.</p>
+                    <p>Tente de novo em alguns segundos, ou conteste mesmo assim.</p>
+                  </motion.div>
+                ) : (
+                  <motion.div key="ok" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={MOLA}>
+                    <div className="c6-quem__cabeca">
+                      <div>
+                        {baixa && <p className="c6-rotulo-fino">Não temos certeza. O mais provável é</p>}
+                        <h3 id="quem-titulo" className="c6-quem__loja">{loja}</h3>
+                        <p className="c6-rotulo-fino">{baixa ? "Lanchonete" : R.atividade}</p>
+                      </div>
+                      <AnelCerteza nivel={baixa ? "baixa" : "alta"} variante="3d" />
+                    </div>
+                    <p className="c6-importante"><span className="c6-importante__i" aria-hidden="true">i</span>{baixa ? R_BAIXA.porque : R.porque}</p>
+                    <MapaFalso distancia={baixa ? R_BAIXA.distancia : R.distancia} longe={baixa} />
+                    {!baixa && (
+                      <div className="c6-caixas">
+                        <C6Caixa rotulo="CNPJ">{R.cnpj}</C6Caixa>
+                        <C6Caixa rotulo="Endereço">{R.endereco}</C6Caixa>
+                        <C6Caixa rotulo="Situação na Receita">Ativa</C6Caixa>
+                      </div>
+                    )}
+                    <details className="ui-fontes c6-fontes">
+                      <summary>{baixa ? "Ver as 2 lojas parecidas" : `Ver as fontes (${R.fontes.length})`}</summary>
+                      <ul>
+                        {(baixa ? ["Lanchonete Bom Dia · a 3,2 km", "Bom Dia Lanches e Café · a 7,8 km"] : R.fontes).map((f) => (
+                          <li key={f}><Icone nome="link" tamanho={14} /> {f}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  </motion.div>
                 )}
-                <details className="ui-fontes c6-fontes">
-                  <summary>{baixa ? "Ver as 2 lojas parecidas" : `Ver as fontes (${R.fontes.length})`}</summary>
-                  <ul>
-                    {(baixa ? ["Lanchonete Bom Dia · a 3,2 km", "Bom Dia Lanches e Café · a 7,8 km"] : R.fontes).map((f) => (
-                      <li key={f}><Icone nome="link" tamanho={14} /> {f}</li>
-                    ))}
-                  </ul>
-                </details>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </section>
+              </AnimatePresence>
+            </motion.section>
+          )}
+        </AnimatePresence>
 
-        {pronto && !falhou && (
-          <motion.section className="c6-categoria" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ ...MOLA, delay: 0.15 }} aria-labelledby="cat-titulo">
-            <h3 id="cat-titulo" className="c6-rotulo">Categoria</h3>
-            {baixa ? (
-              <p className="c6-rotulo-fino">Sem certeza, não sugerimos categoria. A compra fica em "Outros" até você confirmar.</p>
-            ) : (
-              <LayoutGroup>
-                <div className="b1-categoria__linha">
-                  <motion.span layout className={`b1-tag${movida ? " b1-tag--velha" : ""}`}>Outros</motion.span>
-                  <Icone nome="seta" tamanho={16} />
-                  <motion.span layout className={`b1-tag b1-tag--nova${movida ? " b1-tag--ativa" : ""}`}>
-                    {movida && <Icone nome="check" tamanho={14} traco={3} />} {R.categoria}
-                  </motion.span>
-                </div>
-                {!movida && <Toque className="ui-botao ui-botao--secundario ui-botao--largo" onClick={aoMover}>Mover para {R.categoria}</Toque>}
-              </LayoutGroup>
-            )}
-          </motion.section>
-        )}
+        <dl className="c6-campos">
+          <div>
+            <span><dt>Estabelecimento</dt><dd>{estabelecimento}</dd></span>
+            <button type="button" className="c6-pilula" onClick={aoBloqueado}>Alterar</button>
+          </div>
+          <div>
+            <span><dt>Nome original</dt><dd className="c6-campos__cru">MP*PADARIABOMDIA</dd></span>
+          </div>
+          <div>
+            <span><dt>Cartão</dt><dd>Crédito ...1234</dd></span>
+          </div>
+          <div>
+            <span><dt>Categoria</dt><dd>{movida ? R.categoria : "Outros"}{achou && !baixa && !movida && <small> · sugestão: {R.categoria}</small>}</dd></span>
+            {achou && !baixa && !movida
+              ? <button type="button" className="c6-pilula c6-pilula--amarela" onClick={aoMover}>Mover</button>
+              : <button type="button" className="c6-pilula" onClick={aoBloqueado}>Alterar</button>}
+          </div>
+        </dl>
 
-        {pronto && !falhou && (
+        {achou && (
           <details className="b1-tecnico c6-tecnico">
             <summary><Icone nome="codigo" tamanho={16} /> Ver por trás: o que a API recebe e devolve</summary>
             <div className="b1-tecnico__corpo">
@@ -437,19 +465,22 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
           </details>
         )}
 
-        <div className="ui-acoes-fixas c6-acoes">
-          {pronto && falhou ? (
-            <>
-              <Toque className="ui-botao ui-botao--principal" onClick={() => { setFase("analisando"); aoTentarDeNovo(); }}>Tentar de novo</Toque>
-              <Toque className="ui-botao ui-botao--contorno" onClick={aoContestar}>Contestar mesmo assim</Toque>
-            </>
-          ) : (
-            <>
-              <Toque className={`ui-botao ${fase === "inicial" ? "ui-botao--contorno" : "ui-botao--principal"}`} disabled={fase === "analisando"} onClick={aoReconhecer}>Reconheço esta compra</Toque>
-              <Toque className="ui-botao ui-botao--contorno" onClick={aoContestar}>Não reconheço</Toque>
-            </>
-          )}
-        </div>
+        {/* Os botões de decisão só aparecem depois da busca (antes disso, o recibo fica limpo) */}
+        {pronto && (
+          <div className="ui-acoes-fixas c6-acoes">
+            {falhou ? (
+              <>
+                <Toque className="ui-botao ui-botao--principal" onClick={() => { setFase("analisando"); aoTentarDeNovo(); }}>Tentar de novo</Toque>
+                <Toque className="ui-botao ui-botao--contorno" onClick={aoContestar}>Contestar mesmo assim</Toque>
+              </>
+            ) : (
+              <>
+                <Toque className="ui-botao ui-botao--principal" onClick={aoReconhecer}>Reconheço esta compra</Toque>
+                <Toque className="ui-botao ui-botao--contorno" onClick={aoContestar}>Não reconheço</Toque>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
