@@ -26,7 +26,7 @@ const TELAS = [
 
 const NOTAS = {
   inicio: "Tela inicial do app do banco, igual à de todo dia. Logo abaixo dos atalhos, em \"Pra você\", fica o nosso destaque: \"Não reconhece uma compra?\". A pessoa não instala nada e não faz login novo. Toque no destaque.",
-  cartao: "A fatura do cartão. O histórico fica limpo, igual ao do banco: nome, hora e valor. Toque na padaria (MP*PADARIABOMDIA).",
+  cartao: "A fatura do cartão. O histórico fica limpo, igual ao do banco: nome, hora e valor. Toque na padaria (MP*PADARIABOMDIA). Ou toque em PAG*ROSAMARIAPEREIRA: uma loja MEI com o nome da dona na fatura, para ver como a API protege os dados dela.",
   detalhe: "O recibo da compra. O recibo segue o padrão dos bancos digitais: nome, valor, data, botões redondos e campos. O botão \"Quem cobrou?\" só aparece aqui. Ao tocar, o banco manda o nome e o local para a nossa API. A tela mostra cada etapa da busca, depois a loja, a certeza, o mapa e as fontes. A pessoa pode mudar a categoria. Abra \"Ver por trás\" para mostrar a parte técnica ao júri.",
   contestar: "As provas que a API achou já vão junto: loja, CNPJ, endereço e distância. A pessoa não digita nada. Antes de enviar, o app pede confirmação.",
   enviado: "O banco recebe a contestação com provas. A pessoa vê o protocolo e o andamento no próprio app.",
@@ -34,7 +34,10 @@ const NOTAS = {
 
 const COMPRAS = [
   { grupo: "Hoje", itens: [{ id: "mercado", nome: "Supermercado Ideal", cat: "Mercado", valor: "187,40", icone: "carrinho", cor: "#5aa9ff", hora: "13:21" }] },
-  { grupo: "Ontem", itens: [{ id: "padaria", nome: "MP*PADARIABOMDIA", cat: "Outros", valor: "32,50", estranho: true, hora: "08:12" }] },
+  { grupo: "Ontem", itens: [
+    { id: "rosa", nome: "PAG*ROSAMARIAPEREIRA", cat: "Outros", valor: "45,00", estranho: true, hora: "16:30" },
+    { id: "padaria", nome: "MP*PADARIABOMDIA", cat: "Outros", valor: "32,50", estranho: true, hora: "08:12" },
+  ] },
   { grupo: "23 nov", itens: [{ id: "posto", nome: "Posto Avenida", cat: "Transporte", valor: "150,00", icone: "combustivel", cor: "#ffa93a", hora: "18:40" }] },
   { grupo: "22 nov", itens: [
     { id: "lanches", nome: "PAG*LANCHESDOZE", cat: "Outros", valor: "24,00", estranho: true, hora: "12:05" },
@@ -47,18 +50,20 @@ export default function Cenario1() {
   const [movida, setMovida] = useState(false);
   const [reconhecida, setReconhecida] = useState(false);
   const [contestada, setContestada] = useState(false);
+  const [compra, setCompra] = useState("padaria"); // compra aberta no recibo
+  const [marcadaEm, setMarcadaEm] = useState("padaria"); // compra que foi movida, reconhecida ou contestada
   const [erro, setErro] = useState(null);
   const [aviso, setAviso] = useState(null);
+  const mei = erro === "mei" || compra === "rosa";
   const fecharAviso = useCallback(() => setAviso(null), []);
 
-  function recomecar() { nav.trocar("inicio"); setErro(null); setMovida(false); setReconhecida(false); setContestada(false); setAviso(null); }
-  function comErro(tela, e) { return () => { setErro(e); nav.trocar("inicio"); nav.ir("cartao"); if (tela !== "cartao") nav.ir("detalhe"); if (tela === "contestar") nav.ir("contestar"); }; }
+  function recomecar() { nav.trocar("inicio"); setErro(null); setMovida(false); setReconhecida(false); setContestada(false); setAviso(null); setCompra("padaria"); setMarcadaEm("padaria"); }
+  function comErro(tela, e) { return () => { setErro(e); setCompra("padaria"); nav.trocar("inicio"); nav.ir("cartao"); if (tela !== "cartao") nav.ir("detalhe"); if (tela === "contestar") nav.ir("contestar"); }; }
   function irPara(t) { setErro(null); nav.trocar("inicio"); const ordem = TELAS.map((x) => x.id); ordem.slice(1, ordem.indexOf(t) + 1).forEach((x) => nav.ir(x)); }
 
   const ERROS = [
     { id: "api", tela: "detalhe", nome: "Nossa API fora do ar", descricao: "A busca falha. A pessoa pode tentar de novo ou contestar mesmo assim.", acao: comErro("detalhe", "api") },
     { id: "baixa", tela: "detalhe", nome: "Loja sem certeza", descricao: "Duas lojas parecidas, longe do local. Mostramos a dúvida.", acao: comErro("detalhe", "baixa") },
-    { id: "mei", tela: "detalhe", nome: "Loja MEI: dados protegidos", descricao: "A fatura traz o nome do dono. A API esconde sobrenome, CPF, rua e telefone.", acao: comErro("detalhe", "mei") },
     { id: "motivo", tela: "contestar", nome: "Esqueceu o motivo", descricao: "Toque em \"Revisar\" sem escolher o que aconteceu.", acao: comErro("contestar", "motivo") },
     { id: "envio", tela: "contestar", nome: "Falha ao enviar", descricao: "O envio falha na 1ª vez. Nada se perde. Na 2ª tentativa funciona.", acao: comErro("contestar", "envio") },
   ];
@@ -80,21 +85,21 @@ export default function Cenario1() {
               aoBloqueado={() => setAviso({ texto: "No protótipo, toque no destaque \"Não reconhece uma compra?\"." })} />
           )}
           {nav.atual === "cartao" && (
-            <Cartao movida={movida} reconhecida={reconhecida} contestada={contestada}
-              aoTocar={() => nav.ir("detalhe")} aoInicio={nav.voltar}
-              aoBloqueado={() => setAviso({ texto: "No protótipo, só a compra da padaria abre." })} />
+            <Cartao marcadaEm={marcadaEm} movida={movida} reconhecida={reconhecida} contestada={contestada}
+              aoTocar={(id) => { setCompra(id); nav.ir("detalhe"); }} aoInicio={nav.voltar}
+              aoBloqueado={() => setAviso({ texto: "No protótipo, só abrem a padaria e a PAG*ROSAMARIAPEREIRA." })} />
           )}
           {nav.atual === "detalhe" && (
-            <Detalhe erro={erro} movida={movida}
-              aoMover={() => { setMovida(true); setAviso({ texto: `Movida para ${R.categoria}`, acao: "Desfazer", aoAcao: () => { setMovida(false); setAviso(null); } }); }}
+            <Detalhe erro={erro} mei={mei} movida={movida && marcadaEm === (mei ? "rosa" : "padaria")}
+              aoMover={() => { setMovida(true); setMarcadaEm(mei ? "rosa" : "padaria"); setAviso({ texto: `Movida para ${R.categoria}`, acao: "Desfazer", aoAcao: () => { setMovida(false); setAviso(null); } }); }}
               aoTentarDeNovo={() => setErro(null)}
               aoVoltar={nav.voltar}
-              aoReconhecer={() => { setReconhecida(true); nav.voltar(); setAviso({ texto: "Pronto. Marcamos como reconhecida." }); }}
+              aoReconhecer={() => { setReconhecida(true); setMarcadaEm(mei ? "rosa" : "padaria"); nav.voltar(); setAviso({ texto: "Pronto. Marcamos como reconhecida." }); }}
               aoContestar={() => { setAviso(null); nav.ir("contestar"); }}
               aoBloqueado={() => setAviso({ texto: "No protótipo, este botão não abre nada." })} />
           )}
-          {nav.atual === "contestar" && <Contestar erro={erro} baixa={erro === "baixa"} mei={erro === "mei"} aoVoltar={nav.voltar} aoEnviado={() => nav.ir("enviado")} />}
-          {nav.atual === "enviado" && <Enviado mei={erro === "mei"} aoFim={() => { setContestada(true); nav.trocar("inicio"); nav.ir("cartao"); setErro(null); }} />}
+          {nav.atual === "contestar" && <Contestar erro={erro} baixa={erro === "baixa"} mei={mei} aoVoltar={nav.voltar} aoEnviado={() => nav.ir("enviado")} />}
+          {nav.atual === "enviado" && <Enviado mei={mei} aoFim={() => { setContestada(true); setMarcadaEm(mei ? "rosa" : "padaria"); nav.trocar("inicio"); nav.ir("cartao"); setErro(null); }} />}
         </Telas>
       </div>
     </Moldura>
@@ -239,7 +244,7 @@ function CartaoCarbon({ pequeno = false }) {
 }
 
 // ---------- Tela 1: cartão e fatura ----------
-function Cartao({ movida, reconhecida, contestada, aoTocar, aoInicio, aoBloqueado }) {
+function Cartao({ marcadaEm, movida, reconhecida, contestada, aoTocar, aoInicio, aoBloqueado }) {
   const identificada = movida || reconhecida || contestada;
   return (
     <div className="ui-rolagem ui-rolagem--com-tabs c6-tela">
@@ -285,16 +290,16 @@ function Cartao({ movida, reconhecida, contestada, aoTocar, aoInicio, aoBloquead
               <motion.h3 variants={itemEmSequencia} className="c6-dia">{g.grupo}</motion.h3>
               <ul className="c6-extrato">
                 {g.itens.map((c) => {
-                  const padaria = c.id === "padaria";
-                  const ident = padaria && identificada;
-                  const nome = ident ? R.loja : c.nome;
+                  const abre = c.id === "padaria" || c.id === "rosa";
+                  const ident = abre && identificada && c.id === marcadaEm;
+                  const nome = ident ? (c.id === "rosa" ? R_MEI.loja : R.loja) : c.nome;
                   return (
                     <motion.li key={c.id} variants={itemEmSequencia}>
-                      <button type="button" className="c6-extrato__item" onClick={padaria ? aoTocar : aoBloqueado}>
-                        <span className="c6-extrato__icone"><Icone nome={ident ? "pao" : c.icone || "carrinho"} tamanho={20} /></span>
+                      <button type="button" className="c6-extrato__item" onClick={abre ? () => aoTocar(c.id) : aoBloqueado}>
+                        <span className="c6-extrato__icone"><Icone nome={ident && c.id === "padaria" ? "pao" : c.icone || "carrinho"} tamanho={20} /></span>
                         <span className="c6-extrato__meio">
                           <span className="c6-extrato__nome">{nome}</span>
-                          <small>{c.hora} · Crédito{padaria && contestada ? " · Em contestação" : ""}</small>
+                          <small>{c.hora} · Crédito{c.id === marcadaEm && contestada ? " · Em contestação" : ""}</small>
                         </span>
                         <span className="c6-extrato__valor">R$ {c.valor}</span>
                       </button>
@@ -350,14 +355,13 @@ const R_BAIXA = {
 // Folha branca com X, ícone redondo, nome e valor grandes, data e etiqueta "Compra".
 // Botões redondos: "Quem cobrou?" (a nossa função), "Preciso de ajuda" (contestar) e "Comprovante".
 // Embaixo, os campos: Estabelecimento, Nome original, Cartão e Categoria.
-function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer, aoContestar, aoBloqueado }) {
+function Detalhe({ erro, mei, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer, aoContestar, aoBloqueado }) {
   // "inicial": a busca só começa quando a pessoa toca em "Quem cobrou?".
   // Nos casos de erro do Guia, a busca já começa sozinha para mostrar o erro.
   const [fase, setFase] = useState(erro ? "analisando" : "inicial");
   const terminar = useCallback(() => setFase("pronto"), []);
   const falhou = erro === "api";
   const baixa = erro === "baixa";
-  const mei = erro === "mei";
   const pronto = fase === "pronto";
   const achou = pronto && !falhou;
   const loja = baixa ? R_BAIXA.loja : mei ? R_MEI.loja : R.loja;
@@ -374,8 +378,8 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
         <div className="c6-recibo__topo">
           <span className="c6-recibo__icone"><Icone nome={achou && !baixa && !mei ? "pao" : "carrinho"} tamanho={24} /></span>
           <h2 className="c6-recibo__nome">{estabelecimento}</h2>
-          <p className="c6-recibo__valor">R$ 32,50</p>
-          <p className="c6-recibo__data">24 NOV 2026 08:12</p>
+          <p className="c6-recibo__valor">R$ {mei ? "45,00" : "32,50"}</p>
+          <p className="c6-recibo__data">{mei ? "24 NOV 2026 16:30" : "24 NOV 2026 08:12"}</p>
           <span className="c6-recibo__tag">Compra</span>
         </div>
 
@@ -495,7 +499,7 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
             <summary><Icone nome="codigo" tamanho={16} /> Ver por trás: o que a API recebe e devolve</summary>
             <div className="b1-tecnico__corpo">
               <p>O banco manda <code>POST /api/identificar</code></p>
-              <pre>{JSON.stringify(mei ? { ...API_PEDIDO, nome_fatura: R_MEI.cru } : API_PEDIDO, null, 2)}</pre>
+              <pre>{JSON.stringify(mei ? { ...API_PEDIDO, nome_fatura: R_MEI.cru, valor: 45 } : API_PEDIDO, null, 2)}</pre>
               <p>A nossa API devolve (resumo), em cerca de 13 s</p>
               <pre>{JSON.stringify(baixa ? { ...API_RESPOSTA, loja: R_BAIXA.loja, certeza: "baixa", distancia_m: 3200 } : mei ? API_RESPOSTA_MEI : API_RESPOSTA, null, 2)}</pre>
             </div>
@@ -565,7 +569,7 @@ function Contestar({ erro, baixa, mei, aoVoltar, aoEnviado }) {
         <span className="c6-corpo__pegador" aria-hidden="true" />
         <div className="c6-margem">
           <p className="c6-titulo-fino">{mei ? R_MEI.loja : R.loja}</p>
-          <p className="c6-rotulo-fino">R$ 32,50 · ontem, 08:12</p>
+          <p className="c6-rotulo-fino">{mei ? "R$ 45,00 · ontem, 16:30" : "R$ 32,50 · ontem, 08:12"}</p>
 
           <h3 className="c6-rotulo c6-espaco">O que aconteceu?</h3>
           <motion.div role="radiogroup" aria-label="O que aconteceu?" aria-describedby={aviso ? "aviso-tipo" : undefined}
@@ -614,8 +618,8 @@ function Contestar({ erro, baixa, mei, aoVoltar, aoEnviado }) {
       <Folha aberta={folha} aoFechar={() => !enviando && setFolha(false)} titulo="Enviar contestação?" travada={enviando} estilo={coresCss(BANCO_FICTICIO)} classe="c6-modal">
         <h2 className="ui-folha__titulo">Enviar contestação?</h2>
         <div className="c6-caixas">
-          <C6Caixa rotulo="Compra">R$ 32,50 · {mei ? R_MEI.loja : R.loja}</C6Caixa>
-          <C6Caixa rotulo="Data">24/11, 08:12</C6Caixa>
+          <C6Caixa rotulo="Compra">{mei ? `R$ 45,00 · ${R_MEI.loja}` : `R$ 32,50 · ${R.loja}`}</C6Caixa>
+          <C6Caixa rotulo="Data">{mei ? "24/11, 16:30" : "24/11, 08:12"}</C6Caixa>
           <C6Caixa rotulo="Motivo">{tipo === "golpe" ? "Não fui eu" : "Fui eu, mas teve problema"}</C6Caixa>
           <C6Caixa rotulo="Provas">5 itens anexados</C6Caixa>
         </div>
