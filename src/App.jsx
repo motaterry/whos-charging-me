@@ -93,6 +93,10 @@ export default function App() {
         </>
       )}
 
+      <p className="link-prototipos">
+        <a href="#/prototipos">Ver os protótipos: no app de um banco e no nosso app →</a>
+      </p>
+
       <footer className="rodape">
         Usamos dados públicos da Receita Federal e busca na internet. Sempre mostramos a fonte e o quanto temos certeza.
       </footer>
