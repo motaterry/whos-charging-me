@@ -7,10 +7,12 @@ import Moldura from "./Moldura.jsx";
 import Icone from "./ui/Icone.jsx";
 import {
   usePilha, Telas, Toque, Aviso, CheckAnimado, AnelCerteza, Digitando,
-  listaEmSequencia, itemEmSequencia, MOLA,
+  listaEmSequencia, itemEmSequencia, MOLA, MOLA_SUAVE,
 } from "./ui/kit.jsx";
 import { MARCA, coresCss } from "./marca.js";
 import { BANCO, COMPRAS_PAINEL, GASTOS, BANCOS_FICTICIOS } from "./dados.js";
+// Foto do login (troque o arquivo para mudar a imagem; formato WebP, leve para a web).
+import fotoLogin from "../assets/prototipos/login-fundo.webp";
 
 const TELAS = [
   { id: "boas-vindas", nome: "Boas-vindas" },
@@ -64,7 +66,7 @@ export default function Cenario2() {
       telas={TELAS} atual={nav.atual} irPara={irPara}
       aoVoltar={nav.voltar} podeVoltar={nav.tamanho > 1} aoRecomecar={recomecar}
       nota={NOTAS[nav.atual]} erros={ERROS} erroAtual={erro}
-      claro={nav.atual !== "boas-vindas"}
+      claro={nav.atual !== "boas-vindas" && nav.atual !== "conta"}
     >
       <div className="b2" style={coresCss(MARCA)}>
         <Aviso texto={aviso?.texto} acao={aviso?.acao} aoAcao={aviso?.aoAcao} aoFechar={fecharAviso} />
@@ -169,12 +171,19 @@ function Conta({ erro, aoVoltar, aoContinuar }) {
     setTimeout(aoContinuar, 700);
   }
   return (
-    <div className="ui-rolagem ui-rolagem--com-acoes">
+    <div className="b2-login">
+      {/* Foto no fundo da tela toda. Ela aproxima bem devagar (quem pediu menos movimento vê a foto parada). */}
+      <motion.img className="b2-login__foto" src={fotoLogin} alt="" aria-hidden="true"
+        initial={{ scale: 1.12 }} animate={{ scale: 1 }} transition={{ duration: 9, ease: [0.16, 1, 0.3, 1] }} />
+      <div className="b2-login__escurece" aria-hidden="true" />
+      <div className="ui-rolagem ui-rolagem--com-acoes b2-login__rolagem">
       <BarraNav titulo="" aoVoltar={aoVoltar} />
-      <div className="ui-margem">
-        <h2 className="ui-titulo-grande">Criar conta</h2>
-        <p className="ui-suave">Leva 30 segundos. Protótipo: nada é salvo.</p>
-        <motion.div key={tremer} animate={tremer ? { x: [0, -8, 8, -5, 5, 0] } : {}} transition={{ duration: 0.4 }}>
+      <div className="ui-margem b2-login__conteudo">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, ...MOLA_SUAVE }}>
+          <h2 className="ui-titulo-grande b2-login__titulo">Criar conta</h2>
+          <p className="b2-login__sub">Leva 30 segundos. Protótipo: nada é salvo.</p>
+        </motion.div>
+        <motion.div className="b2-login__cartao" key={tremer} animate={tremer ? { x: [0, -8, 8, -5, 5, 0] } : {}} transition={{ duration: 0.4 }}>
           <label className="ui-campo">
             <span>Seu nome</span>
             <input defaultValue="Ana" autoComplete="off" />
@@ -197,10 +206,11 @@ function Conta({ erro, aoVoltar, aoContinuar }) {
           </label>
         </motion.div>
       </div>
-      <div className="ui-acoes-fixas">
+      <div className="ui-acoes-fixas b2-login__acoes">
         <Toque className="ui-botao ui-botao--principal" onClick={continuar} disabled={entrando}>
           {entrando ? <><span className="ui-girando ui-girando--branco" /> Criando...</> : "Continuar"}
         </Toque>
+      </div>
       </div>
     </div>
   );

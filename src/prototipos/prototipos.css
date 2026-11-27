@@ -103,7 +103,7 @@
 /* Faixa de vidro atrás da hora e da bateria, para o conteúdo não passar por baixo delas */
 .ui-tela::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 54px; z-index: 6; pointer-events: none;
   background: rgba(242,242,247,.82); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); }
-.ui-tela:has(.b2-boas)::after { display: none; }
+.ui-tela:has(.b2-boas)::after, .ui-tela:has(.b2-login)::after { display: none; }
 .ui-camada { position: absolute; inset: 0; z-index: 45; pointer-events: none; }
 .ui-camada > * { pointer-events: auto; }
 .ui-rolagem::-webkit-scrollbar { display: none; }
@@ -501,3 +501,27 @@
   .ui-rolagem { padding-top: 12px; }
   .ui-aviso { top: 12px; }
 }
+
+/* ---------- Cenário 2: login com foto no fundo da tela toda ---------- */
+.b2-login { position: absolute; inset: 0; overflow: hidden; background: #2a1d12; }
+.b2-login__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; transform-origin: 55% 40%; }
+/* Escurece em cima (hora e bateria legíveis) e bem mais embaixo (texto branco legível) */
+.b2-login__escurece { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0,0,0,.45) 0%, rgba(0,0,0,0) 16%, rgba(14,9,4,.12) 24%, rgba(14,9,4,.62) 40%, rgba(14,9,4,.86) 70%, rgba(14,9,4,.94) 100%); }
+.b2-login__rolagem { background: transparent; }
+.b2-login .ui-nav { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.b2-login .ui-nav__voltar { color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.4); }
+.b2-login__conteudo { margin-top: auto; padding-top: 40px; }
+.b2-login__titulo { color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,.35); }
+.b2-login__sub { margin: 4px 0 0; color: rgba(255,255,255,.92); font-size: 15px; text-shadow: 0 1px 8px rgba(0,0,0,.55); }
+/* Cartão de vidro: os campos ficam brancos como sempre, então os erros continuam fáceis de ler */
+.b2-login__cartao { margin-top: 16px; padding: 4px 14px 16px; border-radius: 22px; color: #fff;
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); }
+.b2-login__cartao .ui-campo > span:first-child { color: #fff; }
+.b2-login__cartao .ui-campo input { color: #1d1d1f; }
+.b2-login__cartao .ui-suave { color: rgba(255,255,255,.78); }
+.b2-login__cartao .ui-erro-texto { color: #fff; background: rgba(255,59,48,.88); padding: 6px 10px; border-radius: 10px; }
+.b2-login__cartao .b2-forca { background: rgba(255,255,255,.22); }
+.b2-login__acoes { background: transparent; padding-top: 16px; }
+@media (prefers-reduced-motion: reduce) { .b2-login__foto { transform: none !important; } }
