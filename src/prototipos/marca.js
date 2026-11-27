@@ -5,8 +5,10 @@
 export const MARCA = {
   nome: "Quem me cobrou?",
   letraLogo: "?",          // letra ou símbolo dentro do quadrado do logo
-  cor: "#0066cc",          // cor principal (botões, destaques)
-  corFoco: "#0071e3",      // cor do botão quando o mouse passa por cima
+  cor: "#f5c518",          // cor principal (botões, destaques). Amarelo, com gradiente sutil nos botões.
+  corFoco: "#ffdb4d",      // tom mais claro: topo do gradiente e mouse por cima
+  corSobre: "#151515",     // cor do texto em cima da cor principal
+  corLink: "#f5c518",      // cor dos links de texto
   frase: "Ache as compras de nome estranho em todos os seus cartões. Num lugar só.",
 };
 

@@ -67,9 +67,9 @@ export default function Cenario2() {
       telas={TELAS} atual={nav.atual} irPara={irPara}
       aoVoltar={nav.voltar} podeVoltar={nav.tamanho > 1} aoRecomecar={recomecar}
       nota={NOTAS[nav.atual]} erros={ERROS} erroAtual={erro}
-      claro={nav.atual !== "boas-vindas" && nav.atual !== "conta"}
+      claro={false}
     >
-      <div className="b2" style={coresCss(MARCA)}>
+      <div className="b2 b2--escuro" style={coresCss(MARCA)}>
         <Aviso texto={aviso?.texto} acao={aviso?.acao} aoAcao={aviso?.aoAcao} aoFechar={fecharAviso} />
         <Telas chave={nav.atual + (erro || "")} direcao={nav.direcao}>
           {nav.atual === "boas-vindas" && <BoasVindas aoComecar={() => nav.ir("conta")} />}
@@ -240,7 +240,13 @@ function Chat({ escolhas, setEscolhas, aoContinuar }) {
   const respondidas = PERGUNTAS.filter((p) => escolhas[p.chave]);
   const proxima = PERGUNTAS.find((p) => !escolhas[p.chave]);
   const [digitando, setDigitando] = useState(true);
+  const [marcada, setMarcada] = useState(null);
   const passo = respondidas.length;
+  // A opção tocada fica marcada por um instante (borda e canto com check), depois a resposta vai para o chat.
+  function escolher(chave, o) {
+    setMarcada(o);
+    setTimeout(() => { setMarcada(null); setEscolhas((e) => ({ ...e, [chave]: o })); }, 380);
+  }
   useEffect(() => {
     setDigitando(true);
     const t = setTimeout(() => setDigitando(false), 900);
@@ -266,10 +272,14 @@ function Chat({ escolhas, setEscolhas, aoContinuar }) {
         ) : proxima ? (
           <>
             <motion.p className="b2-bolha b2-bolha--app" {...bolha}>{proxima.texto}</motion.p>
-            <motion.div className="b2-chips" role="group" aria-label="Respostas" variants={listaEmSequencia} initial="esconde" animate="mostra">
+            <motion.div className="b2-escolhas" role="radiogroup" aria-label="Respostas" variants={listaEmSequencia} initial="esconde" animate="mostra">
               {proxima.opcoes.map((o) => (
-                <motion.button key={o} variants={itemEmSequencia} type="button" className="b2-chip" whileTap={{ scale: 0.95 }}
-                  onClick={() => setEscolhas({ ...escolhas, [proxima.chave]: o })}>{o}</motion.button>
+                <motion.button key={o} variants={itemEmSequencia} type="button" role="radio" aria-checked={marcada === o}
+                  className={`b2-escolha${marcada === o ? " b2-escolha--on" : ""}`} whileTap={{ scale: 0.98 }}
+                  disabled={!!marcada} onClick={() => escolher(proxima.chave, o)}>
+                  {o}
+                  <span className="b2-escolha__canto" aria-hidden="true"><Icone nome="check" tamanho={11} traco={3.2} /></span>
+                </motion.button>
               ))}
             </motion.div>
           </>
@@ -324,8 +334,8 @@ function Bancos({ bancos, setBancos, aoVoltar, aoContinuar }) {
                 <span>{b}</span>
                 <AnimatePresence>
                   {on && (
-                    <motion.span className="b2-banco__check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={MOLA}>
-                      <Icone nome="check" tamanho={14} traco={3} />
+                    <motion.span className="b2-escolha__canto b2-banco__canto" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.6 }} transition={MOLA}>
+                      <Icone nome="check" tamanho={11} traco={3.2} />
                     </motion.span>
                   )}
                 </AnimatePresence>
@@ -445,7 +455,10 @@ function Permissao({ erro, bancos, aoVoltar, aoAutorizar }) {
 }
 
 // ---------- Painel ----------
+const ABAS_PAINEL = [["todas", "Todas"], ["atencao", "Precisa de você"], ["ok", "Identificadas"]];
+
 function Painel({ erro, escolhas, aoTentarDeNovo, aoAbrir, aoBloqueado }) {
+  const [aba, setAba] = useState("todas");
   const bancoFora = erro === "banco-fora";
   const vazio = erro === "vazio";
   const compras = bancoFora ? COMPRAS_PAINEL.filter((c) => c.banco !== "Banco Horizonte") : vazio ? [] : COMPRAS_PAINEL;
@@ -453,6 +466,7 @@ function Painel({ erro, escolhas, aoTentarDeNovo, aoAbrir, aoBloqueado }) {
   const mostrarCompras = escolhas.objetivo !== "Controlar meus gastos";
   const total = GASTOS.reduce((s, g) => s + g.valor, 0);
   const semCerteza = compras.filter((c) => !c.loja).length;
+  const visiveis = aba === "atencao" ? compras.filter((c) => !c.loja) : aba === "ok" ? compras.filter((c) => c.loja) : compras;
   return (
     <div className="ui-rolagem ui-rolagem--com-tabs">
       <div className="b2-painel-topo">
@@ -479,17 +493,37 @@ function Painel({ erro, escolhas, aoTentarDeNovo, aoAbrir, aoBloqueado }) {
               <span className="ui-suave">Nenhuma compra com nome estranho em novembro. Avisamos se aparecer alguma.</span>
             </motion.div>
           ) : (
-            <motion.div className="b2-resumo" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={MOLA}>
-              <span className="b2-resumo__brilho" aria-hidden="true" />
-              <p className="b2-resumo__rotulo"><Icone nome="brilho" tamanho={16} /> Compras com nome estranho</p>
-              <p id="estranhas" className="b2-resumo__numero">{compras.length}</p>
-              <p className="b2-resumo__texto">
-                {compras.length - semCerteza} já identificadas{semCerteza ? ` · ${semCerteza} precisa da sua atenção` : ""}
-              </p>
-            </motion.div>
+            <>
+              {/* Número grande no topo, com um botão ao lado */}
+              <motion.div className="b2-saldo" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={MOLA}>
+                <p className="b2-saldo__rotulo"><Icone nome="brilho" tamanho={15} /> Compras com nome estranho · novembro</p>
+                <div className="b2-saldo__linha">
+                  <p id="estranhas" className="b2-saldo__numero">{compras.length}</p>
+                  <Toque className="ui-botao ui-botao--principal b2-saldo__botao" onClick={aoBloqueado}>+ Banco</Toque>
+                </div>
+                <p className="b2-saldo__texto">
+                  {compras.length - semCerteza} já identificadas{semCerteza ? <> · <em>{semCerteza} precisa de você</em></> : ""}
+                </p>
+              </motion.div>
+              {/* 3 botões lado a lado: 1 principal e 2 cinza */}
+              <div className="b2-tres">
+                <Toque className="ui-botao ui-botao--principal" onClick={semCerteza ? aoAbrir : aoBloqueado}>Resolver</Toque>
+                <Toque className="ui-botao b2-botao-cinza" onClick={aoBloqueado}>Contestações</Toque>
+                <Toque className="ui-botao b2-botao-cinza" onClick={aoBloqueado}>Relatório</Toque>
+              </div>
+              {/* Abas de texto com traço embaixo da aba ativa */}
+              <div className="b2-abas" role="tablist" aria-label="Filtrar compras">
+                {ABAS_PAINEL.map(([id, n]) => (
+                  <button key={id} type="button" role="tab" aria-selected={aba === id} className={`b2-abas__item${aba === id ? " b2-abas__item--on" : ""}`} onClick={() => setAba(id)}>
+                    {n}
+                    {aba === id && <motion.span layoutId="b2-aba-traco" className="b2-abas__traco" transition={MOLA} />}
+                  </button>
+                ))}
+              </div>
+            </>
           )}
-          <motion.ul className="b2-compras" variants={listaEmSequencia} initial="esconde" animate="mostra">
-            {compras.map((c) => {
+          <motion.ul key={aba} className="b2-compras" variants={listaEmSequencia} initial="esconde" animate="mostra">
+            {visiveis.map((c) => {
               const atencao = !c.loja;
               return (
                 <motion.li key={c.id} variants={itemEmSequencia}>
@@ -534,13 +568,14 @@ function Painel({ erro, escolhas, aoTentarDeNovo, aoAbrir, aoBloqueado }) {
         </motion.section>
       )}
 
-      <section className="ui-cartao b2-mais" aria-labelledby="mais">
+      {/* Grade de atalhos: ícone num quadrado, nome embaixo */}
+      <section className="b2-atalhos" aria-labelledby="mais">
         <h3 id="mais" className="ui-rotulo">Outras funções</h3>
-        {[["relogio", "Assinaturas que se repetem", "Em breve"], ["sino", "Lembretes de prazo", "Em breve"], ["link", "Bancos conectados", "3"]].map(([i, t, d]) => (
-          <button key={t} type="button" className="b2-mais__item" onClick={aoBloqueado}>
-            <span className="b2-mais__icone"><Icone nome={i} tamanho={18} /></span><span>{t}</span><small>{d}</small><Icone nome="seta" tamanho={16} />
-          </button>
-        ))}
+        <ul>
+          {[["relogio", "Assinaturas"], ["sino", "Lembretes"], ["link", "Bancos"], ["grafico", "Gastos"]].map(([i, t]) => (
+            <li key={t}><button type="button" onClick={aoBloqueado}><span className="b2-atalhos__icone"><Icone nome={i} tamanho={22} /></span>{t}</button></li>
+          ))}
+        </ul>
       </section>
 
       <nav className="ui-tabs" aria-label="Menu do app">
@@ -560,19 +595,24 @@ function Compra({ aoVoltar, aoContestar, aoReconhecer }) {
   return (
     <div className="ui-rolagem ui-rolagem--com-acoes">
       <BarraNav titulo="Compra" aoVoltar={aoVoltar} />
-      <div className="b1-heroi">
-        <span className="b2-compra__avatar b2-compra__avatar--q b2-compra__avatar--grande"><Icone nome="interrogacao" tamanho={30} /></span>
-        <p className="b1-heroi__valor">R$ 89,90</p>
-        <p className="b1-heroi__cru">INT*XQZ7 SERVICOS</p>
-        <p className="b1-heroi__data">20 nov · {BANCO} · cartão final 1234</p>
+      {/* Detalhe simples: valor grande, status logo abaixo, dados em linhas */}
+      <div className="b2-detalhe">
+        <p className="b2-detalhe__valor">R$ 89,90</p>
+        <p className="b2-detalhe__status"><Icone nome="interrogacao" tamanho={16} traco={2.4} /> Não sabemos quem cobrou</p>
       </div>
+      <dl className="ui-cartao ui-dados b2-detalhe__dados">
+        <div><dt>Nome na fatura</dt><dd><code>INT*XQZ7 SERVICOS</code></dd></div>
+        <div><dt>Data</dt><dd>20 nov, 14:32</dd></div>
+        <div><dt>Banco</dt><dd>{BANCO}</dd></div>
+        <div><dt>Cartão</dt><dd>Final 1234</dd></div>
+      </dl>
       <motion.section className="ui-cartao b1-quem" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={MOLA}>
         <div className="b1-quem__cabeca">
           <div>
             <p className="ui-suave b1-quem__talvez">Não temos certeza. O mais provável é</p>
             <h3 className="b1-quem__loja">Um serviço pela internet</h3>
           </div>
-          <AnelCerteza nivel="baixa" />
+          <AnelCerteza nivel="baixa" variante="3d" />
         </div>
         <p className="b1-quem__porque">Achamos 2 empresas com nome parecido, em cidades diferentes. Nenhuma bate com certeza.</p>
         <p className="b2-limite"><Icone nome="mapa" tamanho={16} /> O Open Finance talvez não mande o local da compra. Sem o local, a certeza fica mais baixa que no app do banco.</p>
@@ -582,7 +622,7 @@ function Compra({ aoVoltar, aoContestar, aoReconhecer }) {
         </details>
       </motion.section>
       <div className="ui-acoes-fixas">
-        <Toque className="ui-botao ui-botao--perigo-cheio" onClick={aoContestar}>Não reconheço, quero contestar</Toque>
+        <Toque className="ui-botao ui-botao--principal" onClick={aoContestar}>Não reconheço, quero contestar</Toque>
         <Toque className="ui-botao ui-botao--fantasma" onClick={aoReconhecer}>Reconheço, fui eu</Toque>
       </div>
     </div>
