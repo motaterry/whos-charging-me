@@ -10,15 +10,20 @@ export const MARCA = {
   frase: "Ache as compras de nome estranho em todos os seus cartões. Num lugar só.",
 };
 
-// Cenário 1: banco fictício. Nunca usar nome nem cor de banco real.
+// Cenário 1: banco fictício, com visual de banco digital escuro. Nunca usar nome nem logo de banco real.
 export const BANCO_FICTICIO = {
   nome: "Banco Exemplo",
   sigla: "BE",
-  cor: "#0b6e6e",
-  corFoco: "#0a8a8a",
+  cor: "#ffd100",          // cor de destaque (botão principal, aba ativa). Troque aqui para mudar tudo.
+  corFoco: "#ffdd3d",
+  corSobre: "#121212",     // cor do texto em cima da cor de destaque
+  corLink: "#5aa9ff",      // cor dos links de texto
 };
 
 // Transforma as cores em variáveis de CSS para o "style" do app.
 export function coresCss(m) {
-  return { "--cor-destaque": m.cor, "--cor-destaque-foco": m.corFoco };
+  const css = { "--cor-destaque": m.cor, "--cor-destaque-foco": m.corFoco };
+  if (m.corSobre) css["--cor-sobre-destaque"] = m.corSobre;
+  if (m.corLink) css["--cor-link"] = m.corLink;
+  return css;
 }

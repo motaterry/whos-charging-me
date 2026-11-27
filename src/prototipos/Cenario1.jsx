@@ -29,12 +29,12 @@ const NOTAS = {
 };
 
 const COMPRAS = [
-  { grupo: "Hoje", itens: [{ id: "mercado", nome: "Supermercado Ideal", cat: "Mercado", valor: "187,40", icone: "carrinho", cor: "#2f7de1" }] },
+  { grupo: "Hoje", itens: [{ id: "mercado", nome: "Supermercado Ideal", cat: "Mercado", valor: "187,40", icone: "carrinho", cor: "#5aa9ff" }] },
   { grupo: "Ontem", itens: [{ id: "padaria", nome: "MP*PADARIABOMDIA", cat: "Outros", valor: "32,50", estranho: true }] },
-  { grupo: "23 nov", itens: [{ id: "posto", nome: "Posto Avenida", cat: "Transporte", valor: "150,00", icone: "combustivel", cor: "#e2861b" }] },
+  { grupo: "23 nov", itens: [{ id: "posto", nome: "Posto Avenida", cat: "Transporte", valor: "150,00", icone: "combustivel", cor: "#ffa93a" }] },
   { grupo: "22 nov", itens: [
     { id: "lanches", nome: "PAG*LANCHESDOZE", cat: "Outros", valor: "24,00", estranho: true },
-    { id: "farmacia", nome: "Farmácia Saúde Mais", cat: "Saúde", valor: "58,90", icone: "remedio", cor: "#d0457a" },
+    { id: "farmacia", nome: "Farmácia Saúde Mais", cat: "Saúde", valor: "58,90", icone: "remedio", cor: "#ff6fa5" },
   ] },
 ];
 
@@ -64,9 +64,9 @@ export default function Cenario1() {
       subtitulo="Para bancos (B2B). O banco usa a nossa API e mostra a resposta com o visual dele."
       telas={TELAS} atual={nav.atual} irPara={irPara}
       aoVoltar={nav.voltar} podeVoltar={nav.tamanho > 1} aoRecomecar={recomecar}
-      nota={NOTAS[nav.atual]} erros={ERROS} erroAtual={erro}
+      nota={NOTAS[nav.atual]} erros={ERROS} erroAtual={erro} claro={false}
     >
-      <div className="b1" style={coresCss(BANCO_FICTICIO)}>
+      <div className="b1 b1--escuro" style={coresCss(BANCO_FICTICIO)}>
         <Aviso texto={aviso?.texto} acao={aviso?.acao} aoAcao={aviso?.aoAcao} aoFechar={fecharAviso} />
         <Telas chave={nav.atual + (erro || "")} direcao={nav.direcao}>
           {nav.atual === "cartao" && (
@@ -102,21 +102,21 @@ function Avatar({ item, identificado, grande = false }) {
     );
   }
   const icone = item.estranho ? "pao" : item.icone;
-  const cor = item.estranho ? "#1e7b34" : item.cor;
+  const cor = item.estranho ? "#34c759" : item.cor;
   return (
-    <span className={cls} style={{ background: `color-mix(in srgb, ${cor} 14%, #fff)`, color: cor }}>
+    <span className={cls} style={{ background: `color-mix(in srgb, ${cor} 22%, transparent)`, color: cor }}>
       <Icone nome={icone} tamanho={grande ? 30 : 20} />
     </span>
   );
 }
 
 function BarraTabs({ aoBloqueado }) {
-  const abas = [["casa", "Início"], ["cartao", "Cartão"], ["pix", "Pix"], ["mais", "Mais"]];
+  const abas = [["casa", "Início"], ["cartao", "Cartões"], ["pix", "Pix"], ["grafico", "Investir"], ["lista", "Menu"]];
   return (
     <nav className="ui-tabs" aria-label="Menu do banco">
       {abas.map(([i, n]) => (
-        <button key={n} type="button" className={`ui-tabs__item${n === "Cartão" ? " ui-tabs__item--ativo" : ""}`}
-          aria-current={n === "Cartão" ? "page" : undefined} onClick={n === "Cartão" ? undefined : aoBloqueado}>
+        <button key={n} type="button" className={`ui-tabs__item${n === "Cartões" ? " ui-tabs__item--ativo" : ""}`}
+          aria-current={n === "Cartões" ? "page" : undefined} onClick={n === "Cartões" ? undefined : aoBloqueado}>
           <Icone nome={i} tamanho={24} />
           <span>{n}</span>
         </button>
@@ -132,36 +132,43 @@ function Cartao({ movida, reconhecida, contestada, aoTocar, aoBloqueado }) {
   return (
     <div className="ui-rolagem ui-rolagem--com-tabs">
       <div className="b1-topo">
-        <div>
-          <p className="b1-topo__ola">Olá, Ana</p>
-          <h2 className="ui-titulo-grande">Cartão</h2>
+        <h2 className="b1-topo__titulo">Cartões</h2>
+        <div className="b1-topo__icones">
+          <button type="button" aria-label="Buscar" onClick={aoBloqueado}><Icone nome="busca" tamanho={22} /></button>
+          <button type="button" aria-label="Ajuda" onClick={aoBloqueado}><Icone nome="ajuda" tamanho={22} /></button>
+          <span className="b1-topo__perfil" aria-hidden="true">A</span>
         </div>
-        <span className="b1-topo__perfil" aria-hidden="true">A</span>
       </div>
 
-      <motion.div className="b1-cartao" initial={{ rotateX: 18, y: 20, opacity: 0 }} animate={{ rotateX: 0, y: 0, opacity: 1 }} transition={{ ...MOLA, delay: 0.05 }}>
-        <span className="b1-cartao__brilho" aria-hidden="true" />
-        <div className="b1-cartao__linha">
-          <strong>{BANCO_FICTICIO.nome}</strong>
-          <span className="b1-cartao__chip" aria-hidden="true" />
-        </div>
-        <div className="b1-cartao__numero">•••• 1234</div>
-        <div className="b1-cartao__linha b1-cartao__linha--baixo">
-          <span>Ana Exemplo</span><span>Crédito</span>
-        </div>
+      {/* O cartão, pequeno, com a situação dele ao lado */}
+      <motion.div className="b1-meu-cartao" initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ ...MOLA, delay: 0.05 }}>
+        <span className="b1-cartao" aria-hidden="true">
+          <span className="b1-cartao__brilho" />
+          <span className="b1-cartao__sigla">{BANCO_FICTICIO.sigla}</span>
+          <span className="b1-cartao__chip" />
+        </span>
+        <span className="b1-meu-cartao__texto">
+          <strong>Crédito · final 1234</strong>
+          <small><span className="ui-ponto-verde" /> Cartão desbloqueado</small>
+        </span>
+        <button type="button" className="b1-link" onClick={aoBloqueado}>Bloquear</button>
       </motion.div>
 
-      <div className="b1-fatura">
-        <div>
-          <p className="b1-fatura__rotulo">Fatura atual</p>
-          <p className="b1-fatura__valor"><Contador valor={1284.3} /></p>
+      <section className="b1-fatura" aria-label="Fatura aberta">
+        <div className="b1-fatura__cabeca">
+          <p className="b1-fatura__rotulo">Fatura aberta</p>
+          <span className="b1-fatura__vence">Vence em 10 dez</span>
         </div>
-        <span className="ui-pilula">Vence 10 dez</span>
-      </div>
-      <div className="b1-limite" aria-label="Limite usado: 43%">
-        <motion.span initial={{ width: 0 }} animate={{ width: "43%" }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }} />
-      </div>
-      <p className="b1-limite__texto">R$ 1.715,70 de limite livre</p>
+        <p className="b1-fatura__valor"><Contador valor={1284.3} /></p>
+        <div className="b1-limite" aria-label="Limite usado: 43%">
+          <motion.span initial={{ width: 0 }} animate={{ width: "43%" }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }} />
+        </div>
+        <dl className="b1-fatura__dados">
+          <div><dt>Limite disponível</dt><dd>R$ 1.715,70</dd></div>
+          <div><dt>Melhor dia de compra</dt><dd>4 dez</dd></div>
+        </dl>
+        <Toque className="ui-botao ui-botao--principal ui-botao--largo b1-fatura__pagar" onClick={aoBloqueado}>Pagar fatura</Toque>
+      </section>
 
       <AnimatePresence>
         {estranhas > 0 && (
@@ -173,6 +180,17 @@ function Cartao({ movida, reconhecida, contestada, aoTocar, aoBloqueado }) {
           </motion.button>
         )}
       </AnimatePresence>
+
+      <ul className="b1-atalhos" aria-label="Atalhos do cartão">
+        {[["cartao", "Cartão virtual"], ["grafico", "Ajustar limite"], ["cadeado", "Senha"], ["mais", "Mais opções"]].map(([i, n]) => (
+          <li key={n}><button type="button" onClick={aoBloqueado}><Icone nome={i} tamanho={22} /><span>{n}</span></button></li>
+        ))}
+      </ul>
+
+      <div className="b1-transacoes">
+        <h3>Transações</h3>
+        <span className="b1-transacoes__mes">Novembro · <em>Aberta</em></span>
+      </div>
 
       <motion.div variants={listaEmSequencia} initial="esconde" animate="mostra">
         {COMPRAS.map((g) => (
@@ -202,7 +220,7 @@ function Cartao({ movida, reconhecida, contestada, aoTocar, aoBloqueado }) {
                 return (
                   <motion.li key={c.id} variants={itemEmSequencia}>
                     <motion.button type="button" className={`b1-lista__item${c.estranho ? " b1-lista__item--estranho" : ""}`}
-                      whileTap={{ scale: 0.98, backgroundColor: "rgba(0,0,0,0.04)" }}
+                      whileTap={{ scale: 0.98, backgroundColor: "rgba(255,255,255,0.06)" }}
                       onClick={padaria ? aoTocar : aoBloqueado}>
                       {conteudo}
                     </motion.button>
@@ -251,7 +269,7 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
 
   return (
     <div className="ui-rolagem ui-rolagem--com-acoes">
-      <BarraNav titulo="Detalhe da compra" aoVoltar={aoVoltar} voltarTexto="Cartão" />
+      <BarraNav titulo="Detalhe da compra" aoVoltar={aoVoltar} voltarTexto="Cartões" />
 
       <div className="b1-heroi">
         <Avatar item={{ estranho: true }} identificado={pronto && !falhou && !baixa} grande />
@@ -290,7 +308,7 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
                 <AnelCerteza nivel={baixa ? "baixa" : "alta"} />
               </div>
               <p className="b1-quem__porque">{baixa ? R_BAIXA.porque : R.porque}</p>
-              <MapaFalso distancia={baixa ? R_BAIXA.distancia : R.distancia} longe={baixa} />
+              <MapaFalso distancia={baixa ? R_BAIXA.distancia : R.distancia} longe={baixa} escuro />
               {!baixa && (
                 <dl className="ui-dados">
                   <div><dt>CNPJ</dt><dd>{R.cnpj}</dd></div>
@@ -434,7 +452,7 @@ function Contestar({ erro, baixa, aoVoltar, aoEnviado }) {
         <Toque className="ui-botao ui-botao--principal" onClick={revisar}>Revisar e enviar</Toque>
       </div>
 
-      <Folha aberta={folha} aoFechar={() => !enviando && setFolha(false)} titulo="Enviar contestação?" travada={enviando} estilo={coresCss(BANCO_FICTICIO)}>
+      <Folha aberta={folha} aoFechar={() => !enviando && setFolha(false)} titulo="Enviar contestação?" travada={enviando} estilo={coresCss(BANCO_FICTICIO)} classe="b1-folha--escuro">
         <h2 className="ui-folha__titulo">Enviar contestação?</h2>
         <dl className="ui-dados ui-dados--folha">
           <div><dt>Compra</dt><dd>R$ 32,50 · {R.loja}</dd></div>
@@ -469,7 +487,7 @@ function Enviado({ aoFim }) {
       <div className="b1-fim__topo">
         <div className="b1-fim__confete" aria-hidden="true">
           {Array.from({ length: 14 }).map((_, i) => (
-            <motion.span key={i} style={{ background: ["#0b6e6e", "#34c759", "#ffcc00", "#5ac8fa"][i % 4] }}
+            <motion.span key={i} style={{ background: [BANCO_FICTICIO.cor, "#34c759", "#ffffff", "#5ac8fa"][i % 4] }}
               initial={{ x: 0, y: 0, opacity: 1, scale: 0.6 }}
               animate={{ x: Math.cos((i / 14) * Math.PI * 2) * 110, y: Math.sin((i / 14) * Math.PI * 2) * 80 - 20, opacity: 0, scale: 1, rotate: 180 }}
               transition={{ duration: 1.1, delay: 0.5, ease: "easeOut" }} />

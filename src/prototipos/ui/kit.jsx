@@ -61,7 +61,7 @@ export function Toque({ className = "", children, ...resto }) {
 }
 
 // ---------- Folha que sobe de baixo (bottom sheet). Arraste para baixo para fechar. ----------
-export function Folha({ aberta, aoFechar, titulo, children, travada = false, estilo }) {
+export function Folha({ aberta, aoFechar, titulo, children, travada = false, estilo, classe = "" }) {
   // "estilo" leva as cores da marca (a folha aparece fora da tela do app, então precisa recebê-las).
   const alvo = typeof document !== "undefined" ? document.getElementById("ui-camada") : null;
   // Tecla Esc fecha a folha (quem usa teclado também consegue sair).
@@ -81,7 +81,7 @@ export function Folha({ aberta, aoFechar, titulo, children, travada = false, est
             onClick={travada ? undefined : aoFechar}
           />
           <motion.div
-            className="ui-folha" style={estilo}
+            className={`ui-folha ${classe}`} style={estilo}
             role="dialog" aria-modal="true" aria-label={titulo}
             initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={MOLA}
             drag={travada ? false : "y"} dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.6 }}
