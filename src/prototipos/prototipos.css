@@ -1021,3 +1021,5 @@
 .c6 .ui-anel__texto small { font-size: 8px; letter-spacing: .3px; }
 .c6 .ui-anel__texto strong { font-size: 13px; }
 .c6 .c6-tecnico { border-radius: 6px; }
+/* Selo de certeza 3D igual ao do "Dentro do app de finanças": alta verde, média e baixa em amarelo */
+.c6 { --ui-certeza-alta: #34c759; --ui-ambar: var(--cor-destaque); --ui-vermelho: var(--cor-destaque); }

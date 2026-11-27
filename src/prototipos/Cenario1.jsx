@@ -377,7 +377,7 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
                     <h3 id="quem-titulo" className="c6-quem__loja">{baixa ? R_BAIXA.loja : R.loja}</h3>
                     <p className="c6-rotulo-fino">{baixa ? "Lanchonete" : R.atividade}</p>
                   </div>
-                  <AnelCerteza nivel={baixa ? "baixa" : "alta"} />
+                  <AnelCerteza nivel={baixa ? "baixa" : "alta"} variante="3d" />
                 </div>
                 <p className="c6-importante"><span className="c6-importante__i" aria-hidden="true">i</span>{baixa ? R_BAIXA.porque : R.porque}</p>
                 <MapaFalso distancia={baixa ? R_BAIXA.distancia : R.distancia} longe={baixa} />
