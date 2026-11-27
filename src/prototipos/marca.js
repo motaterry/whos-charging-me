@@ -12,10 +12,12 @@ export const MARCA = {
   frase: "Ache as compras de nome estranho em todos os seus cartões. Num lugar só.",
 };
 
-// Cenário 1: banco fictício, com visual de banco digital escuro. Nunca usar nome nem logo de banco real.
+// Cenário 1: o protótipo imita o app do C6 Bank (decisão da Terry em 27/11).
+// Só imitamos layout, cores e estrutura. Sem arquivo de logo oficial: o "C6" é texto.
+// Para voltar a um banco inventado, troque nome e sigla aqui.
 export const BANCO_FICTICIO = {
-  nome: "Banco Exemplo",
-  sigla: "BE",
+  nome: "C6 Bank",
+  sigla: "C6",
   cor: "#ffd100",          // cor de destaque (botão principal, aba ativa). Troque aqui para mudar tudo.
   corFoco: "#ffdd3d",
   corSobre: "#121212",     // cor do texto em cima da cor de destaque

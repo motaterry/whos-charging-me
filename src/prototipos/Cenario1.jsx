@@ -1,6 +1,6 @@
-// Protótipo do cenário 1 (B2B): o "Quem me cobrou?" dentro do app de um banco fictício.
+// Protótipo B2B: o "Quem me cobrou?" dentro do app de um banco. O visual imita o app do C6 Bank (conceito, sem vínculo).
 // O banco já sabe o nome e o local da compra. A pessoa só toca na compra.
-// Fluxo A: cartão -> detalhe (loja achada). Fluxo B: contestar com provas já preenchidas -> enviado.
+// Jornada: tela inicial (destaque "Não reconhece uma compra?") -> cartão -> detalhe (loja achada) -> contestar -> enviado.
 import { useCallback, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "motion/react";
 import Moldura from "./Moldura.jsx";
@@ -15,14 +15,16 @@ import { RESPOSTA_PADARIA as R, API_PEDIDO, API_RESPOSTA } from "./dados.js";
 
 const TELAS = [
   // "acao" = o que a pessoa faz nesta tela para seguir no caminho feliz (aparece no user flow do Guia).
-  { id: "cartao", nome: "Cartão no app do banco", acao: "Toca na compra de nome estranho (MP*PADARIABOMDIA)" },
+  { id: "inicio", nome: "Tela inicial do banco", acao: "Toca no destaque \"Não reconhece uma compra?\"", alternativa: "Ou toca no atalho \"Cartão\": abre a mesma tela" },
+  { id: "cartao", nome: "Cartão e fatura", acao: "Toca na compra de nome estranho (MP*PADARIABOMDIA)" },
   { id: "detalhe", nome: "Quem cobrou (loja achada)", acao: "Vê a loja e toca em \"Não reconheço\"", alternativa: "Ou toca em \"Reconheço esta compra\": a compra fica marcada e volta ao cartão" },
   { id: "contestar", nome: "Contestar com provas", acao: "Escolhe o motivo, revisa e confirma o envio" },
   { id: "enviado", nome: "Contestação enviada", acao: "Fim: guarda o protocolo e volta ao cartão" },
 ];
 
 const NOTAS = {
-  cartao: "A pessoa está no app do banco, sem login novo. Os nomes estranhos ganham a marca \"Quem é?\". Toque na padaria.",
+  inicio: "Tela inicial do app do banco, igual à de todo dia. Logo abaixo dos atalhos, em \"Pra você\", fica o nosso destaque: \"Não reconhece uma compra?\". A pessoa não instala nada e não faz login novo. Toque no destaque.",
+  cartao: "A fatura do cartão. Os nomes estranhos ganham a marca \"Quem é?\". Toque na padaria.",
   detalhe: "O banco mandou o nome e o local para a nossa API. A tela mostra cada etapa da busca, depois a loja, a certeza, o mapa e as fontes. A pessoa pode mudar a categoria. Abra \"Ver por trás\" para mostrar a parte técnica ao júri.",
   contestar: "As provas que a API achou já vão junto: loja, CNPJ, endereço e distância. A pessoa não digita nada. Antes de enviar, o app pede confirmação.",
   enviado: "O banco recebe a contestação com provas. A pessoa vê o protocolo e o andamento no próprio app.",
@@ -39,7 +41,7 @@ const COMPRAS = [
 ];
 
 export default function Cenario1() {
-  const nav = usePilha("cartao");
+  const nav = usePilha("inicio");
   const [movida, setMovida] = useState(false);
   const [reconhecida, setReconhecida] = useState(false);
   const [contestada, setContestada] = useState(false);
@@ -47,9 +49,9 @@ export default function Cenario1() {
   const [aviso, setAviso] = useState(null);
   const fecharAviso = useCallback(() => setAviso(null), []);
 
-  function recomecar() { nav.trocar("cartao"); setErro(null); setMovida(false); setReconhecida(false); setContestada(false); setAviso(null); }
-  function comErro(tela, e) { return () => { setErro(e); nav.trocar("cartao"); if (tela !== "cartao") nav.ir("detalhe"); if (tela === "contestar") nav.ir("contestar"); }; }
-  function irPara(t) { setErro(null); nav.trocar("cartao"); const ordem = TELAS.map((x) => x.id); ordem.slice(1, ordem.indexOf(t) + 1).forEach((x) => nav.ir(x)); }
+  function recomecar() { nav.trocar("inicio"); setErro(null); setMovida(false); setReconhecida(false); setContestada(false); setAviso(null); }
+  function comErro(tela, e) { return () => { setErro(e); nav.trocar("inicio"); nav.ir("cartao"); if (tela !== "cartao") nav.ir("detalhe"); if (tela === "contestar") nav.ir("contestar"); }; }
+  function irPara(t) { setErro(null); nav.trocar("inicio"); const ordem = TELAS.map((x) => x.id); ordem.slice(1, ordem.indexOf(t) + 1).forEach((x) => nav.ir(x)); }
 
   const ERROS = [
     { id: "api", tela: "detalhe", nome: "Nossa API fora do ar", descricao: "A busca falha. A pessoa pode tentar de novo ou contestar mesmo assim.", acao: comErro("detalhe", "api") },
@@ -60,8 +62,9 @@ export default function Cenario1() {
 
   return (
     <Moldura
-      titulo="Cenário 1: dentro do app do banco"
-      subtitulo="Para bancos (B2B). O banco usa a nossa API e mostra a resposta com o visual dele."
+      titulo="Dentro do app do banco (estilo C6)"
+      subtitulo="Para bancos (B2B). O banco usa a nossa API e mostra a resposta com o visual dele. Aqui, imitando o app do C6 Bank."
+      aviso="Conceito. Sem vínculo com o banco."
       telas={TELAS} atual={nav.atual} irPara={irPara}
       aoVoltar={nav.voltar} podeVoltar={nav.tamanho > 1} aoRecomecar={recomecar}
       nota={NOTAS[nav.atual]} erros={ERROS} erroAtual={erro} claro={false}
@@ -69,9 +72,13 @@ export default function Cenario1() {
       <div className="b1 b1--escuro" style={coresCss(BANCO_FICTICIO)}>
         <Aviso texto={aviso?.texto} acao={aviso?.acao} aoAcao={aviso?.aoAcao} aoFechar={fecharAviso} />
         <Telas chave={nav.atual + (erro || "")} direcao={nav.direcao}>
+          {nav.atual === "inicio" && (
+            <InicioBanco aoDestaque={() => nav.ir("cartao")}
+              aoBloqueado={() => setAviso({ texto: "No protótipo, toque no destaque \"Não reconhece uma compra?\"." })} />
+          )}
           {nav.atual === "cartao" && (
             <Cartao movida={movida} reconhecida={reconhecida} contestada={contestada}
-              aoTocar={() => nav.ir("detalhe")}
+              aoTocar={() => nav.ir("detalhe")} aoInicio={nav.voltar}
               aoBloqueado={() => setAviso({ texto: "No protótipo, só a compra da padaria abre." })} />
           )}
           {nav.atual === "detalhe" && (
@@ -83,7 +90,7 @@ export default function Cenario1() {
               aoContestar={() => { setAviso(null); nav.ir("contestar"); }} />
           )}
           {nav.atual === "contestar" && <Contestar erro={erro} baixa={erro === "baixa"} aoVoltar={nav.voltar} aoEnviado={() => nav.ir("enviado")} />}
-          {nav.atual === "enviado" && <Enviado aoFim={() => { setContestada(true); nav.trocar("cartao"); setErro(null); }} />}
+          {nav.atual === "enviado" && <Enviado aoFim={() => { setContestada(true); nav.trocar("inicio"); nav.ir("cartao"); setErro(null); }} />}
         </Telas>
       </div>
     </Moldura>
@@ -110,23 +117,108 @@ function Avatar({ item, identificado, grande = false }) {
   );
 }
 
-function BarraTabs({ aoBloqueado }) {
-  const abas = [["casa", "Início"], ["cartao", "Cartões"], ["pix", "Pix"], ["grafico", "Investir"], ["lista", "Menu"]];
+// Barra de baixo no estilo do C6: 4 abas e o botão preto "C6" no meio. A aba ativa ganha um traço amarelo.
+function BarraC6({ ativa, claro = false, aoIr = {}, aoBloqueado }) {
+  const abas = [["casa", "Início"], ["extrato", "Extrato"], ["c6", "C6"], ["cartao", "Cartões"], ["grafico", "Investir"]];
   return (
-    <nav className="ui-tabs" aria-label="Menu do banco">
-      {abas.map(([i, n]) => (
-        <button key={n} type="button" className={`ui-tabs__item${n === "Cartões" ? " ui-tabs__item--ativo" : ""}`}
-          aria-current={n === "Cartões" ? "page" : undefined} onClick={n === "Cartões" ? undefined : aoBloqueado}>
-          <Icone nome={i} tamanho={24} />
-          <span>{n}</span>
-        </button>
-      ))}
+    <nav className={`c6-tabs${claro ? " c6-tabs--claro" : ""}`} aria-label="Menu do banco">
+      {abas.map(([i, n]) => {
+        if (i === "c6") return <button key={n} type="button" className="c6-tabs__marca" aria-label="Menu C6" onClick={aoBloqueado}>C6</button>;
+        const ativo = n === ativa;
+        return (
+          <button key={n} type="button" className={`c6-tabs__item${ativo ? " c6-tabs__item--ativo" : ""}`}
+            aria-current={ativo ? "page" : undefined} onClick={ativo ? undefined : aoIr[n] || aoBloqueado}>
+            <Icone nome={i} tamanho={22} />
+            <span>{n}</span>
+          </button>
+        );
+      })}
     </nav>
   );
 }
 
+// ---------- Tela 0: tela inicial do banco (estilo C6) ----------
+// Topo preto com saudação e saldo. Embaixo, a folha branca com atalhos, "Pra você" (o nosso destaque) e Pix.
+function InicioBanco({ aoDestaque, aoBloqueado }) {
+  const [verSaldo, setVerSaldo] = useState(false);
+  return (
+    <div className="ui-rolagem c6-inicio">
+      <div className="c6-inicio__topo">
+        <div>
+          <p className="c6-inicio__ola">Boa tarde,</p>
+          <p className="c6-inicio__nome">Angélica</p>
+        </div>
+        <div className="c6-inicio__icones">
+          <button type="button" className="c6-sino" aria-label="Notificações (1 nova)" onClick={aoBloqueado}><Icone nome="sino" tamanho={22} /><span className="c6-sino__ponto" /></button>
+          <button type="button" className="c6-perfil" aria-label="Perfil" onClick={aoBloqueado}>A</button>
+        </div>
+      </div>
+
+      <div className="c6-saldos" aria-label="Contas">
+        <section className="c6-saldo" aria-label="Saldo em reais">
+          <p className="c6-saldo__rotulo"><span className="c6-saldo__bandeira" aria-hidden="true" /> Saldo</p>
+          <div className="c6-saldo__linha">
+            <p className="c6-saldo__valor"><small>R$</small> {verSaldo ? "2.768,90" : "••••••"}</p>
+            <button type="button" className="c6-saldo__olho" aria-label={verSaldo ? "Esconder saldo" : "Mostrar saldo"} aria-pressed={verSaldo} onClick={() => setVerSaldo((v) => !v)}>
+              <Icone nome={verSaldo ? "x" : "olho"} tamanho={18} />
+            </button>
+          </div>
+          <button type="button" className="c6-saldo__rodape" onClick={aoBloqueado}>Ver extrato <Icone nome="seta" tamanho={16} /></button>
+        </section>
+        <section className="c6-saldo c6-saldo--espia" aria-label="Pontos" aria-hidden="true">
+          <p className="c6-saldo__rotulo">Pontos</p>
+          <p className="c6-saldo__valor"><small>PTS</small> 1.240</p>
+        </section>
+      </div>
+
+      <div className="c6-folha">
+        <span className="c6-folha__pegador" aria-hidden="true" />
+        <ul className="c6-atalhos" aria-label="Atalhos">
+          {[["extrato", "Ver extrato"], ["cartao", "Cartão"], ["barras", "Pagar"], ["recarga", "Recargas"], ["transferir", "Transferir"]].map(([i, n]) => (
+            <li key={n}>
+              <button type="button" onClick={n === "Cartão" ? aoDestaque : aoBloqueado}>
+                <span className="c6-atalhos__icone"><Icone nome={i} tamanho={20} /></span>
+                <span>{n}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <div className="c6-secao">
+          <h2>Pra você</h2>
+        </div>
+        {/* O destaque: mesmo lugar e mesmo formato dos cartões de oferta do banco */}
+        <div className="c6-carrossel">
+          <motion.button type="button" className="c6-destaque" onClick={aoDestaque} whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ ...MOLA, delay: 0.15 }}>
+            <span className="c6-destaque__selo"><Icone nome="brilho" tamanho={14} /> Novo</span>
+            <strong className="c6-destaque__titulo">Não reconhece uma compra?</strong>
+            <span className="c6-destaque__texto">Descubra quem cobrou antes de contestar.</span>
+            <span className="c6-destaque__seta" aria-hidden="true"><Icone nome="seta" tamanho={18} traco={2.6} /></span>
+            <span className="c6-destaque__lupa" aria-hidden="true"><Icone nome="busca" tamanho={64} traco={1.4} /></span>
+          </motion.button>
+          <button type="button" className="c6-oferta" onClick={aoBloqueado} aria-label="Oferta: benefícios para clientes">
+            <strong>Benefícios para clientes</strong>
+          </button>
+        </div>
+        <div className="c6-bolinhas" aria-hidden="true"><span className="ativa" /><span /><span /><span /></div>
+
+        <div className="c6-secao c6-secao--pix">
+          <h2><Icone nome="pix" tamanho={18} /> Pix</h2>
+        </div>
+        <ul className="c6-pix" aria-label="Pix">
+          {[["barras", "Ler QR code"], ["transferir", "Transferir"], ["extrato", "Cobrar"], ["cadeado", "Chaves"]].map(([i, n]) => (
+            <li key={n}><button type="button" onClick={aoBloqueado}><span className="c6-pix__bola"><Icone nome={i} tamanho={20} /></span><span>{n}</span></button></li>
+          ))}
+        </ul>
+        <BarraC6 ativa="Início" claro aoIr={{ "Cartões": aoDestaque }} aoBloqueado={aoBloqueado} />
+      </div>
+    </div>
+  );
+}
+
 // ---------- Tela 1: cartão e fatura ----------
-function Cartao({ movida, reconhecida, contestada, aoTocar, aoBloqueado }) {
+function Cartao({ movida, reconhecida, contestada, aoTocar, aoInicio, aoBloqueado }) {
   const identificada = movida || reconhecida || contestada;
   const estranhas = identificada ? 1 : 2;
   return (
@@ -232,7 +324,7 @@ function Cartao({ movida, reconhecida, contestada, aoTocar, aoBloqueado }) {
           </section>
         ))}
       </motion.div>
-      <BarraTabs aoBloqueado={aoBloqueado} />
+      <BarraC6 ativa="Cartões" aoIr={{ "Início": aoInicio }} aoBloqueado={aoBloqueado} />
     </div>
   );
 }
@@ -280,7 +372,7 @@ function Detalhe({ erro, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer
       </div>
 
       <section className="ui-cartao b1-quem" aria-labelledby="quem-titulo" aria-busy={!pronto}>
-        <p className="b1-quem__marca"><Icone nome="brilho" tamanho={16} /> Quem cobrou <span>· com Quem me cobrou?</span></p>
+        <p className="b1-quem__marca"><Icone nome="brilho" tamanho={16} /> Quem cobrou <span>· conferido na Receita</span></p>
         <AnimatePresence mode="wait" initial={false}>
           {!pronto ? (
             <motion.div key="analise" exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
