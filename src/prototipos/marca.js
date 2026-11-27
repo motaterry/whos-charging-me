@@ -13,7 +13,7 @@ export const MARCA = {
 };
 
 // Cenário 1: o protótipo imita o app do C6 Bank (decisão da Terry em 27/11).
-// Só imitamos layout, cores e estrutura. Sem arquivo de logo oficial: o "C6" é texto.
+// Imitamos layout, cores e estrutura. O logo (src/assets/prototipos/c6-logo-branco.png) entrou com aprovação da Terry em 27/11.
 // Para voltar a um banco inventado, troque nome e sigla aqui.
 export const BANCO_FICTICIO = {
   nome: "C6 Bank",
