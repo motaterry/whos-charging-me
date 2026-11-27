@@ -30,7 +30,6 @@
 }
 .proto__sair:hover { background: rgba(255,255,255,.24); }
 .proto__sair:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.proto__aviso-curto { font-size: 11px; color: rgba(255,255,255,.6); }
 .proto__cenario { margin: 0 0 2px; font-size: 13px; font-weight: 600; color: var(--cor-destaque); }
 .proto__cenario-sub { margin: 0 0 var(--espaco-4); font-size: 13px; color: var(--cor-texto-suave); line-height: 1.4; }
 .proto__corpo { display: grid; grid-template-columns: auto 1fr; gap: 56px; align-items: start; }

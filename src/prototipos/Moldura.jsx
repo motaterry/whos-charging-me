@@ -1,5 +1,5 @@
 // Moldura dos protótipos: um celular realista no meio da tela e um painel ao lado com:
-// - faixa dizendo que é protótipo (nada é real);
+// - faixa preta fina com o botão "Sair do protótipo";
 // - "Tela X de Y" e o nome da tela (a pessoa sabe onde está);
 // - Voltar e Recomeçar (a pessoa pode sair de qualquer tela);
 // - "O que mostrar nesta tela", para quem apresenta;
@@ -17,13 +17,12 @@ export default function Moldura({
   return (
     <MotionConfig reducedMotion="user">
       <div className="proto">
-        {/* Faixa preta fina no topo: só o botão de sair e um aviso pequeno de que é protótipo. */}
+        {/* Faixa preta fina no topo: só o botão de sair do protótipo. */}
         <header className="proto__faixa-topo">
           <a className="proto__sair" href="#/">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
             Sair do protótipo
           </a>
-          <span className="proto__aviso-curto">Protótipo · dados de exemplo</span>
         </header>
 
         <div className="proto__corpo">
