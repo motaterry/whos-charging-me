@@ -588,7 +588,7 @@
    Tudo fica dentro de ".b1--escuro" para não mudar o cenário 2. */
 .b1--escuro, .b1-folha--escuro {
   --bx-fundo: #121212; --bx-cartao: #1e1e1e; --bx-cartao-2: #2c2c2e; --bx-linha: rgba(255,255,255,.09); --bx-suave: #a1a1a6;
-  --ui-linha: #333336; --ui-verde: var(--cor-destaque); --ui-vermelho: var(--cor-destaque); --ui-ambar: var(--cor-destaque);
+  --ui-linha: #333336; --ui-certeza-alta: #34c759; --ui-verde: var(--cor-destaque); --ui-vermelho: var(--cor-destaque); --ui-ambar: var(--cor-destaque);
   color: #f5f5f7;
 }
 .b1--escuro { background: var(--bx-fundo); }
@@ -681,7 +681,7 @@
 /* Anel de certeza "3D de mentira" (cenário 1) */
 .ui-anel3d { display: grid; justify-items: center; gap: var(--ep-2); flex: none; perspective: 400px; transform-style: preserve-3d; }
 .ui-anel3d__roda { position: relative; width: 96px; height: 96px; display: grid; place-items: center; }
-.ui-anel3d__roda svg { position: absolute; inset: 0; filter: drop-shadow(0 6px 10px color-mix(in srgb, var(--cor-destaque) 30%, transparent)); }
+.ui-anel3d__roda svg { position: absolute; inset: 0; filter: drop-shadow(0 6px 10px color-mix(in srgb, var(--anel-cor) 35%, transparent)); }
 .ui-anel3d__disco { position: absolute; inset: 14px; border-radius: 50%;
   background: radial-gradient(circle at 34% 28%, #46464a 0%, #232325 45%, #111112 100%);
   box-shadow: inset 0 2px 1px rgba(255,255,255,.18), inset 0 -8px 14px rgba(0,0,0,.65), 0 14px 22px -8px rgba(0,0,0,.9); }

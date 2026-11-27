@@ -149,18 +149,20 @@ export function AnelCerteza({ nivel, variante }) {
   const [p, cor, rotulo] = mapa[nivel] || mapa.baixa;
   const id = useId().replace(/:/g, "");
   if (variante === "3d") {
+    // Exceção de cor: certeza alta é verde, mesmo nos apps que só usam uma cor de destaque.
+    const cor3d = nivel === "alta" ? "var(--ui-certeza-alta, var(--ui-verde))" : cor;
     // Versão "3D de mentira": disco com luz e sombra, anel com brilho, e a palavra "Certeza" fora do anel (mais espaço).
     return (
-      <motion.div className="ui-anel3d" role="img" aria-label={`Certeza ${rotulo.toLowerCase()}`}
+      <motion.div className="ui-anel3d" style={{ "--anel-cor": cor3d }} role="img" aria-label={`Certeza ${rotulo.toLowerCase()}`}
         initial={{ rotateX: 50, scale: 0.7, opacity: 0 }} animate={{ rotateX: 12, scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 260, damping: 18, delay: 0.1 }}>
         <span className="ui-anel3d__roda">
           <span className="ui-anel3d__disco" aria-hidden="true" />
           <svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true">
             <defs>
               <linearGradient id={`g${id}`} x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#fff6b8" />
-                <stop offset="45%" stopColor={cor} />
-                <stop offset="100%" stopColor={`color-mix(in srgb, ${cor} 60%, #000)`} />
+                <stop offset="0%" stopColor={`color-mix(in srgb, ${cor3d} 35%, #fff)`} />
+                <stop offset="45%" stopColor={cor3d} />
+                <stop offset="100%" stopColor={`color-mix(in srgb, ${cor3d} 60%, #000)`} />
               </linearGradient>
             </defs>
             <circle cx="48" cy="48" r="41" fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="9" />
