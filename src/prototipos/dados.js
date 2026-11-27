@@ -51,11 +51,11 @@ export const COMPRAS_PAINEL = [
 ];
 
 export const GASTOS = [
-  { nome: "Mercado", valor: 612, cor: "#0066cc" },
-  { nome: "Alimentação", valor: 348, cor: "#1e7b34" },
-  { nome: "Transporte", valor: 290, cor: "#8a5a00" },
-  { nome: "Saúde", valor: 120, cor: "#6e4fb3" },
-  { nome: "Outros", valor: 114, cor: "#6e6e73" },
+  { nome: "Mercado", valor: 612, cor: "#f5c518" },
+  { nome: "Alimentação", valor: 348, cor: "#c99a06" },
+  { nome: "Transporte", valor: 290, cor: "#8e8e93" },
+  { nome: "Saúde", valor: 120, cor: "#5e5e62" },
+  { nome: "Outros", valor: 114, cor: "#48484a" },
 ];
 
 export const BANCOS_FICTICIOS = [BANCO, "Banco Horizonte", "Banco Ipê", "Cooperativa Vale"];

@@ -20,8 +20,7 @@ export default function MapaFalso({ distancia, longe = false, escuro = false }) 
         <rect x="12" y="78" width="66" height="26" rx="5" fill={c.lilas} />
         <motion.line x1="150" y1="62" x2={loja.x} y2={loja.y + 12} stroke={c.linha} strokeWidth="1.6" strokeDasharray="4 4"
           initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 0.5 }} transition={{ delay: 0.7, duration: 0.6 }} />
-        <motion.circle cx="150" cy="62" r="18" fill={c.compra} initial={{ scale: 0.6, opacity: 0.35 }}
-          animate={{ scale: [0.6, 1.4], opacity: [0.35, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }} />
+        {/* sem halo pulsando (sem glow) */}
         <circle cx="150" cy="62" r="7" fill={c.compra} stroke={escuro ? "#121212" : "#fff"} strokeWidth="2.5" />
         <motion.g initial={{ y: -40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 500, damping: 18, delay: 0.35 }}>
           <path d={`M${loja.x - 14} ${loja.y - 6} c0-8 6-14 14-14 s14 6 14 14 c0 10-14 22-14 22 s-14-12-14-22z`} fill={longe ? c.longe : c.loja} />
