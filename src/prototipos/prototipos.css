@@ -588,7 +588,7 @@
    Tudo fica dentro de ".b1--escuro" para não mudar o cenário 2. */
 .b1--escuro, .b1-folha--escuro {
   --bx-fundo: #121212; --bx-cartao: #1e1e1e; --bx-cartao-2: #2c2c2e; --bx-linha: rgba(255,255,255,.09); --bx-suave: #a1a1a6;
-  --ui-linha: #333336; --ui-verde: #34c759; --ui-vermelho: #ff6b63; --ui-ambar: #ffb340;
+  --ui-linha: #333336; --ui-verde: var(--cor-destaque); --ui-vermelho: var(--cor-destaque); --ui-ambar: var(--cor-destaque);
   color: #f5f5f7;
 }
 .b1--escuro { background: var(--bx-fundo); }
@@ -659,3 +659,21 @@
 .b1--escuro .b1-opcao--ativa .b1-opcao__radio { border-color: var(--cor-destaque); }
 .b1--escuro .b1-provas__check { background: rgba(52,199,89,.16); }
 @media (max-width: 480px) { .proto:has(.b1--escuro) { background: #121212; } }
+/* Cenário 1 escuro: sem verde nem vermelho. Só branco, cinza e o amarelo de destaque (pedido da Terry). */
+.b1--escuro .b1-avatar:not(.b1-avatar--estranho) { background: var(--bx-cartao-2) !important; color: #f5f5f7 !important; }
+.b1--escuro .ui-ponto-verde { background: #f5f5f7; box-shadow: none; }
+.b1--escuro .b1-chip--ok { background: var(--bx-cartao-2); color: #f5f5f7; }
+.b1--escuro .b1-chip--contestada { background: transparent; color: var(--cor-destaque); box-shadow: inset 0 0 0 1px var(--cor-destaque); }
+.b1--escuro .b1-botao-neutro, .b1--escuro .ui-botao--perigo { background: var(--bx-cartao-2); color: #f5f5f7; box-shadow: none; }
+.b1--escuro .b1-erro__icone { background: color-mix(in srgb, var(--cor-destaque) 16%, transparent); color: var(--cor-destaque); }
+.b1--escuro .ui-erro-texto { color: var(--cor-destaque); }
+.b1--escuro .ui-erro-caixa, .b1-folha--escuro .ui-erro-caixa { background: var(--bx-cartao-2); color: #f5f5f7; box-shadow: inset 3px 0 0 var(--cor-destaque); }
+.b1--escuro .ui-erro-caixa svg, .b1-folha--escuro .ui-erro-caixa svg { color: var(--cor-destaque); }
+.b1--escuro .b1-provas__check { background: var(--bx-cartao-2); color: #f5f5f7; }
+.b1--escuro .ui-passos__icone circle { fill: #f5f5f7; }
+.b1--escuro .ui-passos__icone path { stroke: #121212; }
+.b1--escuro .ui-anel__texto strong { color: #f5f5f7 !important; }
+.b1--escuro .ui-linha-tempo li.feito .ui-linha-tempo__ponto { background: #f5f5f7; border-color: #f5f5f7; }
+.b1--escuro .ui-linha-tempo li.feito::after { background: #f5f5f7; }
+.b1--escuro .mapa-falso__ponto--compra { background: #fff; }
+.b1--escuro .mapa-falso__ponto--loja, .b1--escuro .mapa-falso__ponto--longe { background: var(--cor-destaque); }

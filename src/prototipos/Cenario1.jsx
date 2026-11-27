@@ -487,7 +487,7 @@ function Enviado({ aoFim }) {
       <div className="b1-fim__topo">
         <div className="b1-fim__confete" aria-hidden="true">
           {Array.from({ length: 14 }).map((_, i) => (
-            <motion.span key={i} style={{ background: [BANCO_FICTICIO.cor, "#34c759", "#ffffff", "#5ac8fa"][i % 4] }}
+            <motion.span key={i} style={{ background: [BANCO_FICTICIO.cor, "#ffffff", "#8e8e93", BANCO_FICTICIO.cor][i % 4] }}
               initial={{ x: 0, y: 0, opacity: 1, scale: 0.6 }}
               animate={{ x: Math.cos((i / 14) * Math.PI * 2) * 110, y: Math.sin((i / 14) * Math.PI * 2) * 80 - 20, opacity: 0, scale: 1, rotate: 180 }}
               transition={{ duration: 1.1, delay: 0.5, ease: "easeOut" }} />
