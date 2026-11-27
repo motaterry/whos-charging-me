@@ -196,7 +196,7 @@
 .ui-nav__titulo { font-weight: 600; font-size: 17px; }
 .ui-tabs {
   position: sticky; bottom: 0; z-index: 10; margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr); padding: var(--ep-2) var(--ep-2) var(--ep-7);
-  background: rgba(249,249,249,.82); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background: rgba(249,249,249,.94); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-top: .5px solid rgba(0,0,0,.12);
 }
 .ui-rolagem--com-tabs > .ui-tabs { margin-top: auto; }
@@ -392,21 +392,21 @@
 .b2-malha span:nth-child(2) { background: #a855f7; top: 20%; right: -10%; animation-duration: 18s; }
 .b2-malha span:nth-child(3) { background: #ff6b9a; bottom: 0; left: 20%; animation-duration: 16s; opacity: .7; }
 @keyframes b2-flutuar { from { transform: translate(0, 0) scale(1); } to { transform: translate(12%, 10%) scale(1.15); } }
-.b2-boas__conteudo { position: relative; height: 100%; display: flex; flex-direction: column; padding: var(--ep-11) var(--ep-6) var(--ep-8); }
+.b2-boas__conteudo { position: relative; height: 100%; display: flex; flex-direction: column; padding: var(--ep-10) var(--ep-6) var(--ep-7); }
 .b2-boas__marca { display: flex; gap: var(--ep-3); align-items: center; font-weight: 700; font-size: 17px; }
-.b2-demo { position: relative; height: 200px; margin: var(--ep-9) 0 var(--ep-5); display: grid; place-items: center; }
+/* O cartão de exemplo fica no centro do espaço livre entre a marca e o título */
+.b2-demo { position: relative; flex: 1; min-height: 120px; display: flex; flex-direction: column; justify-content: center; padding: var(--ep-6) 0 var(--ep-7); }
+.b2-demo__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ep-2); }
 .b2-demo__cartao {
-  position: relative; width: 100%; padding: var(--ep-4); border-radius: 22px; background: rgba(255,255,255,.14); backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,.22); box-shadow: 0 20px 40px rgba(0,0,0,.25); z-index: 1;
+  display: flex; align-items: center; gap: var(--ep-3); padding: var(--ep-3); border-radius: 18px; background: rgba(255,255,255,.14);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,.22); box-shadow: 0 12px 30px rgba(0,0,0,.18);
 }
-.b2-demo__cartao--fundo { position: absolute; height: 80px; width: 86%; background: rgba(255,255,255,.07); z-index: 0; }
-.b2-demo__linha { display: flex; gap: var(--ep-3); align-items: center; min-height: 48px; }
-.b2-demo__linha code { font-size: 15px; font-weight: 600; display: block; color: #fff; }
-.b2-demo__linha strong { font-size: 18px; display: block; }
-.b2-demo__linha small { font-size: 13px; opacity: .75; display: block; }
-.b2-demo__avatar { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: #fff; color: #30a14e; font-weight: 800; font-size: 20px; flex: none; }
-.b2-demo__avatar--q { color: var(--cor-destaque); }
-.b2-boas__titulo { font-size: 40px; line-height: 1.02; letter-spacing: -1.4px; font-weight: 800; margin: auto 0 var(--ep-3); }
+.b2-demo__textos { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.b2-demo__textos strong { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.b2-demo__textos code { font-size: 12px; opacity: .75; }
+.b2-demo__ok { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: #30d158; color: #fff; flex: none; }
+.b2-demo__avatar { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; background: #fff; color: #30a14e; font-weight: 800; font-size: 20px; flex: none; }
+.b2-boas__titulo { font-size: 38px; line-height: 1.04; letter-spacing: -1.3px; font-weight: 800; margin: 0 0 var(--ep-3); }
 .b2-boas__titulo span { display: block; background: linear-gradient(90deg, #fff, #c4b5fd 60%, #ff9ac1); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .b2-boas__frase { margin: 0 0 var(--ep-6); font-size: 17px; line-height: 1.4; opacity: .85; }
 .b2-boas__acoes { display: grid; gap: var(--ep-2); }
@@ -529,11 +529,17 @@
   .proto { padding: 40px 0 0; background: #f2f2f7; }
   .proto__faixa-texto { display: none; }
   .proto-guia { padding-left: var(--ep-4); padding-right: var(--ep-4); }
-  .ui-iphone { width: 100vw; height: calc(100svh - 40px); padding: 0; border-radius: 0; box-shadow: none; background: none; }
+  .ui-iphone { width: 100vw; height: calc(100svh - 40px); height: calc(100dvh - 40px); padding: 0; border-radius: 0; box-shadow: none; background: none; }
   .ui-iphone__tela { border-radius: 0; }
   .ui-status, .ui-iphone__barra, .ui-tela::after { display: none; }
   .ui-rolagem { padding-top: var(--ep-3); }
   .ui-aviso { top: 12px; }
+  /* No celular de verdade não existe a barrinha do iPhone desenhada: as barras de baixo ficam mais baixas
+     e respeitam a área segura da tela (env). */
+  .ui-acoes-fixas { padding: var(--ep-6) var(--ep-4) calc(var(--ep-4) + env(safe-area-inset-bottom)); }
+  .ui-tabs { padding-bottom: calc(var(--ep-2) + env(safe-area-inset-bottom)); }
+  .b2-boas__conteudo { padding: var(--ep-6) var(--ep-6) calc(var(--ep-4) + env(safe-area-inset-bottom)); }
+  .b2-demo { padding: var(--ep-4) 0 var(--ep-6); }
 }
 
 /* ---------- Cenário 2: login com foto no fundo da tela toda ---------- */

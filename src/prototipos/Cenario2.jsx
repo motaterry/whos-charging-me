@@ -107,12 +107,23 @@ function BarraNav({ titulo, aoVoltar }) {
 }
 
 // ---------- Boas-vindas: fundo com gradiente vivo e cartão que se transforma ----------
+// Lojas que passam na lista animada da tela de boas-vindas: nome estranho na fatura e a loja achada.
+const DEMO_LOJAS = [
+  { cru: "MP*PADARIABOMDIA", loja: "Padaria Bom Dia", icone: "pao", cor: "#30a14e" },
+  { cru: "PAG*LANCHESDOZE", loja: "Lanches do Zé", icone: "lanche", cor: "#e2861b" },
+  { cru: "JIM.COM* POSTO AV", loja: "Posto Avenida", icone: "combustivel", cor: "#2f7de1" },
+  { cru: "SUMUP*FARMSAUDE", loja: "Farmácia Saúde Mais", icone: "remedio", cor: "#d0457a" },
+  { cru: "EC*MERCADOIDEAL", loja: "Supermercado Ideal", icone: "carrinho", cor: "#7c5cff" },
+];
+
 function BoasVindas({ aoComecar }) {
-  const [virou, setVirou] = useState(false);
+  // Lista animada: a cada 1,8 s entra um cartão novo embaixo (sobe com fade in) e o de cima sai (fade out).
+  const [inicio, setInicio] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setVirou((v) => !v), 2200);
+    const t = setInterval(() => setInicio((i) => i + 1), 1800);
     return () => clearInterval(t);
   }, []);
+  const visiveis = [0, 1, 2].map((k) => ({ n: inicio + k, ...DEMO_LOJAS[(inicio + k) % DEMO_LOJAS.length] }));
   return (
     <div className="b2-boas">
       <div className="b2-malha" aria-hidden="true"><span /><span /><span /></div>
@@ -122,26 +133,28 @@ function BoasVindas({ aoComecar }) {
         </motion.div>
 
         <div className="b2-demo" aria-hidden="true">
-          <motion.div className="b2-demo__cartao b2-demo__cartao--fundo" animate={{ rotate: -8, y: 18 }} />
-          <motion.div className="b2-demo__cartao" layout transition={MOLA}>
-            <AnimatePresence mode="wait">
-              {!virou ? (
-                <motion.div key="cru" className="b2-demo__linha" initial={{ opacity: 0, filter: "blur(4px)" }} animate={{ opacity: 1, filter: "blur(0px)" }} exit={{ opacity: 0, filter: "blur(4px)" }}>
-                  <span className="b2-demo__avatar b2-demo__avatar--q">?</span>
-                  <span><code>MP*PADARIABOMDIA</code><small>Nome estranho na fatura</small></span>
-                </motion.div>
-              ) : (
-                <motion.div key="loja" className="b2-demo__linha" initial={{ opacity: 0, filter: "blur(4px)" }} animate={{ opacity: 1, filter: "blur(0px)" }} exit={{ opacity: 0, filter: "blur(4px)" }}>
-                  <span className="b2-demo__avatar"><Icone nome="pao" tamanho={20} /></span>
-                  <span><strong>Padaria Bom Dia</strong><small><span className="ui-ponto-verde" /> Certeza alta · 24 m</small></span>
-                </motion.div>
-              )}
+          <ul className="b2-demo__lista">
+            <AnimatePresence initial={false} mode="popLayout">
+              {visiveis.map((d, k) => (
+                <motion.li key={d.n} layout className="b2-demo__cartao"
+                  initial={{ opacity: 0, y: 28, scale: 0.96 }}
+                  animate={{ opacity: k === 0 ? 0.55 : 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -28, scale: 0.96 }}
+                  transition={MOLA}>
+                  <span className="b2-demo__avatar" style={{ color: d.cor }}><Icone nome={d.icone} tamanho={20} /></span>
+                  <span className="b2-demo__textos">
+                    <strong>{d.loja}</strong>
+                    <small><code>{d.cru}</code></small>
+                  </span>
+                  <span className="b2-demo__ok"><Icone nome="check" tamanho={14} traco={3} /></span>
+                </motion.li>
+              ))}
             </AnimatePresence>
-          </motion.div>
+          </ul>
         </div>
 
         <motion.h2 className="b2-boas__titulo" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, ...MOLA }}>
-          Quem te cobrou? <span>A gente descobre.</span>
+          Compra estranha? <span>A gente descobre.</span>
         </motion.h2>
         <motion.p className="b2-boas__frase" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>{MARCA.frase}</motion.p>
         <motion.div className="b2-boas__acoes" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
