@@ -1,4 +1,4 @@
-// Protótipo B2B: o "Quem me cobrou?" dentro do app de um banco. O visual imita o app do C6 Bank (conceito, sem vínculo).
+// Protótipo B2B: a Merchant Match API dentro do app de um banco. O visual imita o app do C6 Bank (conceito, sem vínculo).
 // O banco já sabe o nome e o local da compra. A pessoa só toca na compra.
 // Jornada: tela inicial (destaque "Não reconhece uma compra?") -> cartão -> detalhe (loja achada) -> contestar -> enviado.
 import { useCallback, useState } from "react";

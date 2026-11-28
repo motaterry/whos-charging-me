@@ -4,7 +4,7 @@ export default function Inicio() {
     <main className="pagina">
       <a className="botao botao--link" href="#/">← Voltar ao site</a>
       <h1>Protótipos</h1>
-      <p className="subtitulo">Como o "Quem me cobrou?" chega às pessoas: dentro do app do banco ou dentro de um app de finanças. São telas clicáveis, com dados de exemplo. Conceito, sem vínculo com o banco.</p>
+      <p className="subtitulo">Como a Merchant Match API chega às pessoas: dentro do app do banco ou dentro de um app de finanças. São telas clicáveis, com dados de exemplo. Conceito, sem vínculo com o banco.</p>
       <ul className="proto-escolha">
         <li>
           <a className="proto-escolha__item" href="#/prototipos/cenario-1">
