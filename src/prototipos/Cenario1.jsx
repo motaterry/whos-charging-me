@@ -4,7 +4,6 @@
 import { useCallback, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "motion/react";
 import Moldura from "./Moldura.jsx";
-import MapaFalso from "./MapaFalso.jsx";
 import Icone from "./ui/Icone.jsx";
 import {
   usePilha, Telas, Toque, Folha, Aviso, Contador, CheckAnimado, AnelCerteza, Esqueleto,
@@ -13,7 +12,7 @@ import {
 import { BANCO_FICTICIO, coresCss } from "./marca.js";
 import logoC6 from "../assets/prototipos/c6-logo-branco.png";
 import logoC6Bank from "../assets/prototipos/c6-bank-logo-branco.png";
-import { RESPOSTA_PADARIA as R, API_PEDIDO, API_RESPOSTA } from "./dados.js";
+import { API_PEDIDO, API_RESPOSTA } from "./dados.js";
 
 const TELAS = [
   // "acao" = o que a pessoa faz nesta tela para seguir no caminho feliz (aparece no user flow do Guia).
@@ -26,9 +25,9 @@ const TELAS = [
 
 const NOTAS = {
   inicio: "Tela inicial do app do banco, igual à de todo dia. Logo abaixo dos atalhos, em \"Pra você\", fica o nosso destaque: \"Não reconhece uma compra?\". A pessoa não instala nada e não faz login novo. Toque no destaque.",
-  cartao: "A fatura do cartão. O histórico fica limpo, igual ao do banco: nome, hora e valor. Toque na padaria (MP*PADARIABOMDIA). Ou toque em PAG*ROSAMARIAPEREIRA: uma loja MEI com o nome da dona na fatura, para ver como a API protege os dados dela.",
-  detalhe: "O recibo da compra. O recibo segue o padrão dos bancos digitais: nome, valor, data, botões redondos e campos. O botão \"Quem cobrou?\" só aparece aqui. Ao tocar, o banco manda o nome e o local para a nossa API. A tela mostra cada etapa da busca, depois a loja, a certeza, o mapa e as fontes. A pessoa pode mudar a categoria. Abra \"Ver por trás\" para mostrar a parte técnica ao júri.",
-  contestar: "As provas que a API achou já vão junto: loja, CNPJ, endereço e distância. A pessoa não digita nada. Antes de enviar, o app pede confirmação.",
+  cartao: "A fatura do cartão. O histórico fica limpo, igual ao do banco: nome, hora e valor. As compras de nome estranho abrem: a padaria (MP*), uma loja MEI com o nome da dona (PAG*ROSAMARIAPEREIRA), um pedido do iFood (IFD*) e uma cobrança da Apple (APPLE.COM/BILL).",
+  detalhe: "O recibo da compra. O botão \"Quem cobrou?\" só aparece aqui, para a API (que custa por consulta) rodar só quando a pessoa pede. Depois da busca, a tela mostra a loja, o selo de certeza e só o mínimo: razão social, nome do estabelecimento, categoria, cidade e país. CNPJ, endereço, dono e situação na Receita vão para o banco na API, mas não aparecem aqui. Abra \"Ver por trás\" para mostrar a parte técnica ao júri.",
+  contestar: "As provas que a API achou já vão junto: loja, razão social, categoria, cidade e certeza. A pessoa não digita nada. Antes de enviar, o app pede confirmação.",
   enviado: "O banco recebe a contestação com provas. A pessoa vê o protocolo e o andamento no próprio app.",
 };
 
@@ -38,9 +37,13 @@ const COMPRAS = [
     { id: "rosa", nome: "PAG*ROSAMARIAPEREIRA", cat: "Outros", valor: "45,00", estranho: true, hora: "16:30" },
     { id: "padaria", nome: "MP*PADARIABOMDIA", cat: "Outros", valor: "32,50", estranho: true, hora: "08:12" },
   ] },
-  { grupo: "23 nov", itens: [{ id: "posto", nome: "Posto Avenida", cat: "Transporte", valor: "150,00", icone: "combustivel", cor: "#ffa93a", hora: "18:40" }] },
+  { grupo: "23 nov", itens: [
+    { id: "ifood", nome: "IFD*SBRCASAREFEICOES", cat: "Outros", valor: "58,70", estranho: true, hora: "20:45" },
+    { id: "posto", nome: "Posto Avenida", cat: "Transporte", valor: "150,00", icone: "combustivel", cor: "#ffa93a", hora: "18:40" },
+  ] },
   { grupo: "22 nov", itens: [
     { id: "lanches", nome: "PAG*LANCHESDOZE", cat: "Outros", valor: "24,00", estranho: true, hora: "12:05" },
+    { id: "apple", nome: "APPLE.COM/BILL", cat: "Outros", valor: "14,90", estranho: true, hora: "03:10" },
     { id: "farmacia", nome: "Farmácia Saúde Mais", cat: "Saúde", valor: "58,90", icone: "remedio", cor: "#ff6fa5", hora: "09:30" },
   ] },
 ];
@@ -54,7 +57,9 @@ export default function Cenario1() {
   const [marcadaEm, setMarcadaEm] = useState("padaria"); // compra que foi movida, reconhecida ou contestada
   const [erro, setErro] = useState(null);
   const [aviso, setAviso] = useState(null);
-  const mei = erro === "mei" || compra === "rosa";
+  // Nos desvios do Guia, o recibo usa sempre a padaria.
+  const casoId = erro ? "padaria" : compra;
+  const caso = CASOS[casoId];
   const fecharAviso = useCallback(() => setAviso(null), []);
 
   function recomecar() { nav.trocar("inicio"); setErro(null); setMovida(false); setReconhecida(false); setContestada(false); setAviso(null); setCompra("padaria"); setMarcadaEm("padaria"); }
@@ -87,19 +92,19 @@ export default function Cenario1() {
           {nav.atual === "cartao" && (
             <Cartao marcadaEm={marcadaEm} movida={movida} reconhecida={reconhecida} contestada={contestada}
               aoTocar={(id) => { setCompra(id); nav.ir("detalhe"); }} aoInicio={nav.voltar}
-              aoBloqueado={() => setAviso({ texto: "No protótipo, só abrem a padaria e a PAG*ROSAMARIAPEREIRA." })} />
+              aoBloqueado={() => setAviso({ texto: "No protótipo, só abrem as compras de nome estranho." })} />
           )}
           {nav.atual === "detalhe" && (
-            <Detalhe erro={erro} mei={mei} movida={movida && marcadaEm === (mei ? "rosa" : "padaria")}
-              aoMover={() => { setMovida(true); setMarcadaEm(mei ? "rosa" : "padaria"); setAviso({ texto: `Movida para ${R.categoria}`, acao: "Desfazer", aoAcao: () => { setMovida(false); setAviso(null); } }); }}
+            <Detalhe erro={erro} caso={caso} movida={movida && marcadaEm === casoId}
+              aoMover={() => { setMovida(true); setMarcadaEm(casoId); setAviso({ texto: `Movida para ${caso.categoria}`, acao: "Desfazer", aoAcao: () => { setMovida(false); setAviso(null); } }); }}
               aoTentarDeNovo={() => setErro(null)}
               aoVoltar={nav.voltar}
-              aoReconhecer={() => { setReconhecida(true); setMarcadaEm(mei ? "rosa" : "padaria"); nav.voltar(); setAviso({ texto: "Pronto. Marcamos como reconhecida." }); }}
+              aoReconhecer={() => { setReconhecida(true); setMarcadaEm(casoId); nav.voltar(); setAviso({ texto: "Pronto. Marcamos como reconhecida." }); }}
               aoContestar={() => { setAviso(null); nav.ir("contestar"); }}
               aoBloqueado={() => setAviso({ texto: "No protótipo, este botão não abre nada." })} />
           )}
-          {nav.atual === "contestar" && <Contestar erro={erro} baixa={erro === "baixa"} mei={mei} aoVoltar={nav.voltar} aoEnviado={() => nav.ir("enviado")} />}
-          {nav.atual === "enviado" && <Enviado mei={mei} aoFim={() => { setContestada(true); setMarcadaEm(mei ? "rosa" : "padaria"); nav.trocar("inicio"); nav.ir("cartao"); setErro(null); }} />}
+          {nav.atual === "contestar" && <Contestar erro={erro} baixa={erro === "baixa"} caso={caso} aoVoltar={nav.voltar} aoEnviado={() => nav.ir("enviado")} />}
+          {nav.atual === "enviado" && <Enviado caso={caso} aoFim={() => { setContestada(true); setMarcadaEm(casoId); nav.trocar("inicio"); nav.ir("cartao"); setErro(null); }} />}
         </Telas>
       </div>
     </Moldura>
@@ -290,13 +295,13 @@ function Cartao({ marcadaEm, movida, reconhecida, contestada, aoTocar, aoInicio,
               <motion.h3 variants={itemEmSequencia} className="c6-dia">{g.grupo}</motion.h3>
               <ul className="c6-extrato">
                 {g.itens.map((c) => {
-                  const abre = c.id === "padaria" || c.id === "rosa";
+                  const abre = Boolean(CASOS[c.id]);
                   const ident = abre && identificada && c.id === marcadaEm;
-                  const nome = ident ? (c.id === "rosa" ? R_MEI.loja : R.loja) : c.nome;
+                  const nome = ident ? CASOS[c.id].loja : c.nome;
                   return (
                     <motion.li key={c.id} variants={itemEmSequencia}>
                       <button type="button" className="c6-extrato__item" onClick={abre ? () => aoTocar(c.id) : aoBloqueado}>
-                        <span className="c6-extrato__icone"><Icone nome={ident && c.id === "padaria" ? "pao" : c.icone || "carrinho"} tamanho={20} /></span>
+                        <span className="c6-extrato__icone"><Icone nome={ident ? CASOS[c.id].icone : c.icone || "carrinho"} tamanho={20} /></span>
                         <span className="c6-extrato__meio">
                           <span className="c6-extrato__nome">{nome}</span>
                           <small>{c.hora} · Crédito{c.id === marcadaEm && contestada ? " · Em contestação" : ""}</small>
@@ -318,32 +323,67 @@ function Cartao({ marcadaEm, movida, reconhecida, contestada, aoTocar, aoInicio,
 
 const PASSOS = ["Limpando o nome da maquininha", "Procurando o CNPJ na Receita Federal", "Comparando com o local da compra"];
 
-// Caso MEI: a razão social é o nome da dona com o CPF no fim (comum em MEI).
-// A API esconde o sobrenome, o CPF, a rua e o telefone. Tudo inventado.
-const R_MEI = {
-  cru: "PAG*ROSAMARIAPEREIRA",
-  loja: "Doces da Rosa",
-  dona: "Rosa Maria P.",
-  atividade: "Confeitaria · MEI (empresa de uma pessoa só)",
-  bairro: "Jardim Exemplo, Cidade Exemplo",
-  categoria: "Alimentação",
-  porque: "A loja é de uma pessoa só (MEI). Para proteger a dona, mostramos só o primeiro nome, o bairro e a cidade. O endereço na Receita fica no mesmo bairro onde o cartão foi usado.",
-  escondidos: ["Sobrenome completo da dona", "CPF que aparece no nome oficial", "Rua e número (pode ser a casa da dona)", "Telefone"],
-  fontes: ["Receita Federal (dados públicos do CNPJ)", "Perfil da loja numa rede social"],
+// Os casos que abrem no protótipo. A tela mostra só o mínimo para a pessoa
+// reconhecer a compra: razão social, nome da loja, categoria, cidade e país.
+// CNPJ, endereço, dono e situação na Receita vão para o banco na API,
+// mas não aparecem aqui (decisão de 27/11). Tudo é inventado, menos as marcas iFood e Apple.
+const CASOS = {
+  padaria: {
+    cru: "MP*PADARIABOMDIA", valor: "32,50", data: "24 NOV 2026 08:12", curta: "ontem, 08:12", dataCurta: "24/11, 08:12",
+    loja: "Padaria Bom Dia", razao: "PADARIA BOM DIA COMERCIO DE ALIMENTOS LTDA",
+    sub: "Padaria e confeitaria", categoria: "Alimentação", cidade: "Cidade Exemplo", pais: "Brasil",
+    certeza: "alta", icone: "pao",
+    porque: "O nome bate com uma empresa ativa na Receita. Ela fica perto de onde o cartão foi usado.",
+    fontes: ["Receita Federal (dados públicos do CNPJ)", "Site da loja"],
+  },
+  rosa: {
+    cru: "PAG*ROSAMARIAPEREIRA", valor: "45,00", data: "24 NOV 2026 16:30", curta: "ontem, 16:30", dataCurta: "24/11, 16:30",
+    loja: "Doces da Rosa", razao: "ROSA MARIA ******* ***********",
+    sub: "Confeitaria · MEI (empresa de uma pessoa só)", categoria: "Alimentação", cidade: "Cidade Exemplo", pais: "Brasil",
+    certeza: "alta", icone: "carrinho", mei: true,
+    porque: "É uma loja de uma pessoa só (MEI). O nome oficial traz o nome e o CPF da dona, então escondemos o fim dele.",
+    fontes: ["Receita Federal (dados públicos do CNPJ)", "Perfil da loja numa rede social"],
+  },
+  ifood: {
+    cru: "IFD*SBRCASAREFEICOES", valor: "58,70", data: "23 NOV 2026 20:45", curta: "23 nov, 20:45", dataCurta: "23/11, 20:45",
+    loja: "Restaurante Sabor de Casa", razao: "SABOR DE CASA REFEICOES LTDA",
+    sub: "Restaurante · pedido pelo iFood", categoria: "Alimentação", cidade: "Cidade Exemplo", pais: "Brasil",
+    certeza: "alta", icone: "carrinho",
+    porque: "\"IFD*\" quer dizer que o pedido foi pelo iFood. O resto do nome é a empresa do restaurante, ativa na Receita.",
+    fontes: ["Receita Federal (dados públicos do CNPJ)", "Página do restaurante no iFood"],
+  },
+  apple: {
+    cru: "APPLE.COM/BILL", valor: "14,90", data: "22 NOV 2026 03:10", curta: "22 nov, 03:10", dataCurta: "22/11, 03:10",
+    loja: "Apple: app ou assinatura", razao: null,
+    sub: "App Store, iCloud+, Apple Music ou outro serviço", categoria: "Assinaturas e serviços digitais", cidade: null, pais: null,
+    certeza: "media", icone: "carrinho",
+    porque: "APPLE.COM/BILL aparece em compras de apps, músicas e filmes e em renovação de assinaturas, inclusive de alguém da família. A Apple não diz qual serviço foi. Confira em reportaproblem.apple.com.",
+    fontes: ["Página de ajuda da Apple sobre apple.com/bill"],
+  },
 };
-const API_RESPOSTA_MEI = {
-  consulta: "c_51d0e7",
-  loja: "Doces da Rosa",
-  dono: "Rosa Maria P.",
-  mei: true,
-  bairro: "Jardim Exemplo",
-  cidade: "Cidade Exemplo",
-  certeza: "alta",
-  categoria: "Alimentação",
-  dados_protegidos: true,
-  campos_ocultos: ["nome_completo", "cpf", "logradouro", "telefone"],
-  fontes: 2,
-};
+
+// O que a API devolve para o banco em cada caso (resumo para o "Ver por trás").
+// O banco recebe mais campos do que a tela mostra.
+function respostaDaApi(caso, baixa) {
+  if (baixa) return { ...API_RESPOSTA, loja: R_BAIXA.loja, certeza: "baixa", distancia_m: 3200 };
+  return {
+    consulta: "c_" + caso.cru.length.toString(16) + "8f3a",
+    loja: caso.loja,
+    razao_social: caso.mei ? "(nome da dona: só para o banco)" : caso.razao,
+    cnpj: caso.razao ? "(só para o banco)" : null,
+    endereco: caso.razao ? "(só para o banco)" : null,
+    categoria: caso.categoria,
+    cidade: caso.cidade, pais: caso.pais,
+    certeza: caso.certeza,
+    fontes: caso.fontes.length,
+  };
+}
+
+const NIVEIS = [
+  ["Alta", "As fontes oficiais confirmam a loja."],
+  ["Média", "É a loja mais provável, mas falta uma confirmação."],
+  ["Baixa", "Achamos lojas parecidas. Confira antes de decidir."],
+];
 
 const R_BAIXA = {
   loja: "Lanchonete Bom Dia",
@@ -355,7 +395,7 @@ const R_BAIXA = {
 // Folha branca com X, ícone redondo, nome e valor grandes, data e etiqueta "Compra".
 // Botões redondos: "Quem cobrou?" (a nossa função), "Preciso de ajuda" (contestar) e "Comprovante".
 // Embaixo, os campos: Estabelecimento, Nome original, Cartão e Categoria.
-function Detalhe({ erro, mei, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer, aoContestar, aoBloqueado }) {
+function Detalhe({ erro, caso, movida, aoMover, aoTentarDeNovo, aoVoltar, aoReconhecer, aoContestar, aoBloqueado }) {
   // "inicial": a busca só começa quando a pessoa toca em "Quem cobrou?".
   // Nos casos de erro do Guia, a busca já começa sozinha para mostrar o erro.
   const [fase, setFase] = useState(erro ? "analisando" : "inicial");
@@ -364,8 +404,8 @@ function Detalhe({ erro, mei, movida, aoMover, aoTentarDeNovo, aoVoltar, aoRecon
   const baixa = erro === "baixa";
   const pronto = fase === "pronto";
   const achou = pronto && !falhou;
-  const loja = baixa ? R_BAIXA.loja : mei ? R_MEI.loja : R.loja;
-  const cru = mei ? R_MEI.cru : "MP*PADARIABOMDIA";
+  const loja = baixa ? R_BAIXA.loja : caso.loja;
+  const cru = caso.cru;
   const estabelecimento = achou && !baixa ? loja : cru;
 
   return (
@@ -376,10 +416,10 @@ function Detalhe({ erro, mei, movida, aoMover, aoTentarDeNovo, aoVoltar, aoRecon
         </button>
 
         <div className="c6-recibo__topo">
-          <span className="c6-recibo__icone"><Icone nome={achou && !baixa && !mei ? "pao" : "carrinho"} tamanho={24} /></span>
+          <span className="c6-recibo__icone"><Icone nome={achou && !baixa ? caso.icone : "carrinho"} tamanho={24} /></span>
           <h2 className="c6-recibo__nome">{estabelecimento}</h2>
-          <p className="c6-recibo__valor">R$ {mei ? "45,00" : "32,50"}</p>
-          <p className="c6-recibo__data">{mei ? "24 NOV 2026 16:30" : "24 NOV 2026 08:12"}</p>
+          <p className="c6-recibo__valor">R$ {caso.valor}</p>
+          <p className="c6-recibo__data">{caso.data}</p>
           <span className="c6-recibo__tag">Compra</span>
         </div>
 
@@ -429,41 +469,30 @@ function Detalhe({ erro, mei, movida, aoMover, aoTentarDeNovo, aoVoltar, aoRecon
                       <div>
                         {baixa && <p className="c6-rotulo-fino">Não temos certeza. O mais provável é</p>}
                         <h3 id="quem-titulo" className="c6-quem__loja">{loja}</h3>
-                        <p className="c6-rotulo-fino">{baixa ? "Lanchonete" : mei ? R_MEI.atividade : R.atividade}</p>
+                        <p className="c6-rotulo-fino">{baixa ? "Lanchonete" : caso.sub}</p>
                       </div>
-                      <AnelCerteza nivel={baixa ? "baixa" : "alta"} variante="3d" />
+                      <AnelCerteza nivel={baixa ? "baixa" : caso.certeza} variante="3d" />
                     </div>
-                    <p className="c6-importante"><span className="c6-importante__i" aria-hidden="true">i</span>{baixa ? R_BAIXA.porque : mei ? R_MEI.porque : R.porque}</p>
-                    {!mei && <MapaFalso distancia={baixa ? R_BAIXA.distancia : R.distancia} longe={baixa} />}
-                    {mei && (
-                      <>
-                        <div className="c6-caixas">
-                          <C6Caixa rotulo="Dona">{R_MEI.dona}</C6Caixa>
-                          <C6Caixa rotulo="Bairro e cidade">{R_MEI.bairro}</C6Caixa>
-                          <C6Caixa rotulo="Situação na Receita">Ativa</C6Caixa>
-                        </div>
-                        <details className="ui-fontes c6-fontes">
-                          <summary>O que escondemos e por quê</summary>
-                          <ul>
-                            {R_MEI.escondidos.map((f) => (
-                              <li key={f}><Icone nome="cadeado" tamanho={14} /> {f}</li>
-                            ))}
-                          </ul>
-                          <p className="c6-rotulo-fino">Num MEI, esses dados são da pessoa, não da empresa. Pela LGPD, a API manda só o necessário. Eles não saem do nosso servidor.</p>
-                        </details>
-                      </>
-                    )}
-                    {!baixa && !mei && (
+                    <p className="c6-importante"><span className="c6-importante__i" aria-hidden="true">i</span>{baixa ? R_BAIXA.porque : caso.porque}</p>
+                    {!baixa && (
                       <div className="c6-caixas">
-                        <C6Caixa rotulo="CNPJ">{R.cnpj}</C6Caixa>
-                        <C6Caixa rotulo="Endereço">{R.endereco}</C6Caixa>
-                        <C6Caixa rotulo="Situação na Receita">Ativa</C6Caixa>
+                        {caso.razao && <C6Caixa rotulo="Razão social">{caso.razao}</C6Caixa>}
+                        <C6Caixa rotulo="Nome do estabelecimento">{caso.loja}</C6Caixa>
+                        <C6Caixa rotulo="Categoria">{caso.categoria}</C6Caixa>
+                        <C6Caixa rotulo="Cidade e país">{caso.cidade ? `${caso.cidade}, ${caso.pais}` : "Compra online"}</C6Caixa>
                       </div>
                     )}
                     <details className="ui-fontes c6-fontes">
-                      <summary>{baixa ? "Ver as 2 lojas parecidas" : `Ver as fontes (${(mei ? R_MEI : R).fontes.length})`}</summary>
+                      <summary>O que quer dizer a certeza</summary>
                       <ul>
-                        {(baixa ? ["Lanchonete Bom Dia · a 3,2 km", "Bom Dia Lanches e Café · a 7,8 km"] : mei ? R_MEI.fontes : R.fontes).map((f) => (
+                        {NIVEIS.map(([n, t]) => <li key={n}><strong>{n}:</strong>&nbsp;{t}</li>)}
+                      </ul>
+                      <p className="c6-rotulo-fino">É uma sugestão feita por IA com dados públicos. Não é 100% garantida.</p>
+                    </details>
+                    <details className="ui-fontes c6-fontes">
+                      <summary>{baixa ? "Ver as 2 lojas parecidas" : `Ver as fontes (${caso.fontes.length})`}</summary>
+                      <ul>
+                        {(baixa ? ["Lanchonete Bom Dia · a 3,2 km", "Bom Dia Lanches e Café · a 7,8 km"] : caso.fontes).map((f) => (
                           <li key={f}><Icone nome="link" tamanho={14} /> {f}</li>
                         ))}
                       </ul>
@@ -487,7 +516,7 @@ function Detalhe({ erro, mei, movida, aoMover, aoTentarDeNovo, aoVoltar, aoRecon
             <span><dt>Cartão</dt><dd>Crédito ...1234</dd></span>
           </div>
           <div>
-            <span><dt>Categoria</dt><dd>{movida ? R.categoria : "Outros"}{achou && !baixa && !movida && <small> · sugestão: {R.categoria}</small>}</dd></span>
+            <span><dt>Categoria</dt><dd>{movida ? caso.categoria : "Outros"}{achou && !baixa && !movida && <small> · sugestão: {caso.categoria}</small>}</dd></span>
             {achou && !baixa && !movida
               ? <button type="button" className="c6-pilula c6-pilula--amarela" onClick={aoMover}>Mover</button>
               : <button type="button" className="c6-pilula" onClick={aoBloqueado}>Alterar</button>}
@@ -499,9 +528,9 @@ function Detalhe({ erro, mei, movida, aoMover, aoTentarDeNovo, aoVoltar, aoRecon
             <summary><Icone nome="codigo" tamanho={16} /> Ver por trás: o que a API recebe e devolve</summary>
             <div className="b1-tecnico__corpo">
               <p>O banco manda <code>POST /api/identificar</code></p>
-              <pre>{JSON.stringify(mei ? { ...API_PEDIDO, nome_fatura: R_MEI.cru, valor: 45 } : API_PEDIDO, null, 2)}</pre>
+              <pre>{JSON.stringify({ ...API_PEDIDO, nome_fatura: caso.cru, valor: Number(caso.valor.replace(",", ".")) }, null, 2)}</pre>
               <p>A nossa API devolve (resumo), em cerca de 13 s</p>
-              <pre>{JSON.stringify(baixa ? { ...API_RESPOSTA, loja: R_BAIXA.loja, certeza: "baixa", distancia_m: 3200 } : mei ? API_RESPOSTA_MEI : API_RESPOSTA, null, 2)}</pre>
+              <pre>{JSON.stringify(respostaDaApi(caso, baixa), null, 2)}</pre>
             </div>
           </details>
         )}
@@ -528,7 +557,7 @@ function Detalhe({ erro, mei, movida, aoMover, aoTentarDeNovo, aoVoltar, aoRecon
 }
 
 // ---------- Tela 3: contestar com provas ----------
-function Contestar({ erro, baixa, mei, aoVoltar, aoEnviado }) {
+function Contestar({ erro, baixa, caso, aoVoltar, aoEnviado }) {
   const [tipo, setTipo] = useState("");
   const [aviso, setAviso] = useState("");
   const [folha, setFolha] = useState(false);
@@ -550,12 +579,10 @@ function Contestar({ erro, baixa, mei, aoVoltar, aoEnviado }) {
     }, 1100);
   }
 
-  const provas = mei ? [
-    ["Loja", R_MEI.loja], ["Dona (MEI)", R_MEI.dona], ["Bairro e cidade", R_MEI.bairro],
-    ["Situação na Receita", "Ativa"], ["Fontes consultadas", `${R_MEI.fontes.length}`],
-  ] : [
-    ["Loja", R.loja], ["CNPJ na Receita", R.cnpj], ["Endereço da loja", R.endereco],
-    ["Distância do local da compra", R.distancia], ["Fontes consultadas", `${R.fontes.length}`],
+  const provas = [
+    ["Loja", caso.loja], ...(caso.razao ? [["Razão social", caso.razao]] : []),
+    ["Categoria", caso.categoria], ["Cidade e país", caso.cidade ? `${caso.cidade}, ${caso.pais}` : "Compra online"],
+    ["Certeza", { alta: "Alta", media: "Média", baixa: "Baixa" }[caso.certeza]], ["Fontes consultadas", `${caso.fontes.length}`],
   ];
   const opcoes = [
     ["golpe", "Não fui eu", "Alguém usou meu cartão. O banco bloqueia este cartão e manda outro.", "escudo"],
@@ -568,8 +595,8 @@ function Contestar({ erro, baixa, mei, aoVoltar, aoEnviado }) {
       <div className="c6-corpo">
         <span className="c6-corpo__pegador" aria-hidden="true" />
         <div className="c6-margem">
-          <p className="c6-titulo-fino">{mei ? R_MEI.loja : R.loja}</p>
-          <p className="c6-rotulo-fino">{mei ? "R$ 45,00 · ontem, 16:30" : "R$ 32,50 · ontem, 08:12"}</p>
+          <p className="c6-titulo-fino">{caso.loja}</p>
+          <p className="c6-rotulo-fino">R$ {caso.valor} · {caso.curta}</p>
 
           <h3 className="c6-rotulo c6-espaco">O que aconteceu?</h3>
           <motion.div role="radiogroup" aria-label="O que aconteceu?" aria-describedby={aviso ? "aviso-tipo" : undefined}
@@ -618,8 +645,8 @@ function Contestar({ erro, baixa, mei, aoVoltar, aoEnviado }) {
       <Folha aberta={folha} aoFechar={() => !enviando && setFolha(false)} titulo="Enviar contestação?" travada={enviando} estilo={coresCss(BANCO_FICTICIO)} classe="c6-modal">
         <h2 className="ui-folha__titulo">Enviar contestação?</h2>
         <div className="c6-caixas">
-          <C6Caixa rotulo="Compra">{mei ? `R$ 45,00 · ${R_MEI.loja}` : `R$ 32,50 · ${R.loja}`}</C6Caixa>
-          <C6Caixa rotulo="Data">{mei ? "24/11, 16:30" : "24/11, 08:12"}</C6Caixa>
+          <C6Caixa rotulo="Compra">R$ {caso.valor} · {caso.loja}</C6Caixa>
+          <C6Caixa rotulo="Data">{caso.dataCurta}</C6Caixa>
           <C6Caixa rotulo="Motivo">{tipo === "golpe" ? "Não fui eu" : "Fui eu, mas teve problema"}</C6Caixa>
           <C6Caixa rotulo="Provas">5 itens anexados</C6Caixa>
         </div>
@@ -643,7 +670,7 @@ function Contestar({ erro, baixa, mei, aoVoltar, aoEnviado }) {
 }
 
 // ---------- Tela 4: enviado ----------
-function Enviado({ mei, aoFim }) {
+function Enviado({ caso, aoFim }) {
   const [copiado, setCopiado] = useState(false);
   return (
     <div className="ui-rolagem c6-tela">
