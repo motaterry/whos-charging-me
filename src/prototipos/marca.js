@@ -3,7 +3,7 @@
 
 // Cenário 2: o nosso app (a Aline vai definir o branding).
 export const MARCA = {
-  nome: "Quem me cobrou?",
+  nome: "Merchant Match API",
   letraLogo: "?",          // letra ou símbolo dentro do quadrado do logo
   cor: "#f5c518",          // cor principal (botões, destaques). Amarelo, com gradiente sutil nos botões.
   corFoco: "#ffdb4d",      // tom mais claro: topo do gradiente e mouse por cima

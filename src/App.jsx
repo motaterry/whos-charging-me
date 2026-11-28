@@ -52,7 +52,7 @@ export default function App() {
     <main className="pagina">
       <header className={tela === "busca" ? "cabecalho cabecalho--com-ilustracao" : "cabecalho"}>
         <div>
-          <h1>Quem me cobrou?</h1>
+          <h1>Merchant Match API</h1>
           <p className="subtitulo">
             Viu um nome estranho na fatura do cartão? Digite aqui. A gente descobre qual é a loja.
           </p>

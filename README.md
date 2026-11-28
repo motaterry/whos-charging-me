@@ -1,4 +1,6 @@
-# Quem me cobrou? (whos-charging-me)
+# Merchant Match API
+
+Antes se chamava "Quem me cobrou?" (whos-charging-me). O endereço do site e do repositório continuam iguais.
 
 Projeto do hackathon HackBrasil 2026.
 
